@@ -1,0 +1,39 @@
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "timestamp": "2023-10-27T10:00:00Z",
+  "sellers": [
+    {
+      "name": "Alice Smith",
+      "role": "Account Executive"
+    },
+    {
+      "name": "Bob Jones",
+      "role": "Sales Engineer"
+    }
+  ],
+  "customers": [
+    {
+      "name": "Charlie Brown",
+      "role": "CTO"
+    },
+    {
+      "name": "Diana Prince",
+      "role": "VP of Engineering"
+    }
+  ],
+  "description": "Initial discovery meeting to discuss project requirements and potential fit.",
+  "linkedOpportunities": [
+    {
+      "closeDate": "2023-12-15",
+      "stage": "Discovery",
+      "revenue": 50000,
+      "stageAdjustedRevenue": 10000
+    },
+    {
+      "closeDate": "2024-01-30",
+      "stage": "Proposal",
+      "revenue": 75000,
+      "stageAdjustedRevenue": 37500
+    }
+  ]
+}

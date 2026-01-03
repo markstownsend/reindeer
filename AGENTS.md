@@ -1,8 +1,7 @@
-
-
 ## Frontend Development Standards
 
 ### React Requirements
+
 - **TypeScript** for all components
 - **Tailwind CSS** for styling
 - **Vite** as build tool
@@ -11,13 +10,19 @@
 - **Error boundaries** implementation
 
 ### Code Organization
+
 - Components: PascalCase naming
 - Functions: camelCase naming
 - Imports order: React → third-party → local
 
 ## Agent Context
 
+In advance of any changes please make sure you look at the files in the `./design/` directory for specific instructions about this project.
+
+Please also consult files in the `./implement/` directory for specific instructions about this project.
+
 <!-- tessl-managed -->)
+
 @.tessl/RULES.md
 
 <!-- BACKLOG.MD MCP GUIDELINES START -->
@@ -38,6 +43,7 @@ This project uses Backlog.md MCP for all task and project management activities.
 - **When to read it**: BEFORE creating tasks, or when you're unsure whether to track work
 
 These guides cover:
+
 - Decision framework for when to create tasks
 - Search-first workflow to avoid duplicates
 - Links to detailed guides for task creation, execution, and completion

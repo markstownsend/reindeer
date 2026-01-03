@@ -3,6 +3,9 @@
   "dependencies": {
     "tessl/npm-d3": {
       "version": "7.9.0"
+    },
+    "tessl/npm-tailwindcss": {
+      "version": "4.1.0"
     }
   }
 }
