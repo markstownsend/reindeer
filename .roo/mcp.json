@@ -1,12 +1,19 @@
-{"mcpServers" : {
-  "backlog": {
+{
+  "mcpServers": {
+    "backlog": {
       "command": "backlog",
-      "args": ["mcp", "start"]
+      "args": ["mcp", "start"],
+      "alwaysAllow": [
+        "get_workflow_overview",
+        "task_view",
+        "get_task_execution_guide",
+        "task_edit",
+        "task_list",
+        "task_create",
+        "task_archive"
+      ]
     },
-    "tessl": {
-      "type": "stdio",
-      "command": "tessl",
-      "args": [ "mcp", "start" ]
-    }
-}
+    "tessl": { "type": "stdio", "command": "tessl", "args": ["mcp", "start"] },
+    "agent-sops": { "command": "strands-agents-sops", "args": ["mcp"] }
+  }
 }
