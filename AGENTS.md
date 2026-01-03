@@ -1,27 +1,28 @@
-## Frontend Development Standards
+# AGENTS.md
 
-### React Requirements
+This file provides guidance to agents when working with code in this repository.
 
-- **TypeScript** for all components
-- **Tailwind CSS** for styling
-- **Vite** as build tool
-- **Functional components** with hooks
-- **Proper prop typing** with TypeScript
-- **Error boundaries** implementation
+## Commands
 
-### Code Organization
+- **Dev Server**: `npm run dev` (Vite)
+- **Build**: `npm run build` (tsc + vite build)
+- **Lint**: `npm run lint` (eslint)
+- **Testing**: No automated test runner configured (Vitest/Jest). Use `src/components/TestHarness/TestHarness.tsx` for visual verification.
 
-- Components: PascalCase naming
-- Functions: camelCase naming
-- Imports order: React → third-party → local
+## Non-Obvious Patterns
 
-## Agent Context
+- **Backlog Management**: Always use `mcp--backlog` tools. Do not edit `backlog/` markdown files directly. See `backlog://workflow/overview`.
+- **Visualization**: Core logic is in `src/components/ReindeerChart/ReindeerChart.tsx`. It uses D3.js within a React `useEffect` hook with an SVG `ref`.
+- **CSS**: Uses Tailwind CSS v4. Standard Tailwind classes are used directly in `className`.
+- **Project Structure**:
+  - `design/`: Contains visual and architectural specifications for the Reindeer visualization.
+  - `implement/`: Contains SOPs and implementation guidelines (e.g., `CODEASSIST.md`).
+- **Imports**: Order: React → third-party (d3) → local (types/components).
 
-In advance of any changes please make sure you look at the files in the `./design/` directory for specific instructions about this project.
+## Custom Constraints
 
-Please also consult files in the `./implement/` directory for specific instructions about this project.
-
-<!-- tessl-managed -->)
+- **D3 Selection**: Use `svg.selectAll("*").remove()` at the start of `useEffect` to ensure clean redraws on data/dimension updates.
+- **Styling**: Prefer Tailwind utility classes for colors and fonts within SVG (e.g., `fill-white`, `text-xl`).
 
 @.tessl/RULES.md
 
@@ -30,6 +31,11 @@ Please also consult files in the `./implement/` directory for specific instructi
 <CRITICAL_INSTRUCTION>
 
 ## BACKLOG WORKFLOW INSTRUCTIONS
+
+This project uses Backlog.md MCP for all task and project management activities. Read `backlog://workflow/overview` before starting work.
+</CRITICAL_INSTRUCTION>
+
+<!-- BACKLOG.MD MCP GUIDELINES END -->
 
 This project uses Backlog.md MCP for all task and project management activities.
 
