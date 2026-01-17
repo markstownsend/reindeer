@@ -11,6 +11,7 @@ export interface Customer {
 }
 
 export interface Opportunity {
+  id: string;
   closeDate: string; // ISO 8601 date YYYY-MM-DD
   stage: string;
   revenue: number;

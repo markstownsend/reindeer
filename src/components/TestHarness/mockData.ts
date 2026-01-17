@@ -9,6 +9,7 @@ export const smallDataset: Activity[] = [
     description: "Initial discovery meeting.",
     linkedOpportunities: [
       {
+        id: "opp-001",
         closeDate: "2023-12-15",
         stage: "Discovery",
         revenue: 50000,
@@ -27,6 +28,7 @@ export const typicalDataset: Activity[] = [
     description: "First contact",
     linkedOpportunities: [
       {
+        id: "opp-101",
         closeDate: "2023-12-15",
         stage: "Discovery",
         revenue: 50000,
@@ -42,6 +44,7 @@ export const typicalDataset: Activity[] = [
     description: "Deep dive demo",
     linkedOpportunities: [
       {
+        id: "opp-101",
         closeDate: "2023-12-15",
         stage: "Proposal",
         revenue: 50000,
@@ -57,6 +60,7 @@ export const typicalDataset: Activity[] = [
     description: "Technical review",
     linkedOpportunities: [
       {
+        id: "opp-102",
         closeDate: "2024-01-20",
         stage: "Qualified",
         revenue: 120000,
@@ -76,6 +80,7 @@ export const edgeCaseLarge: Activity[] = Array.from({ length: 20 }, (_, i) => ({
   description: `Activity ${i}`,
   linkedOpportunities: [
     {
+      id: `opp-large-${i}`,
       closeDate: "2023-12-31",
       stage: "Closing",
       revenue: 10000 * (i + 1),
