@@ -1,7 +1,17 @@
-# Code Mode Rules (Non-Obvious Only)
+# Agent Rules
 
-- **Backlog First**: Non-trivial changes MUST be tracked in Backlog. Check for existing tasks before creating new ones.
-- **D3/React Lifecycle**: Always include `svg.selectAll("*").remove()` at the beginning of `useEffect` to prevent duplicate elements on re-renders.
-- **Tailwind v4**: Use utility classes directly in `className` for SVG elements where possible (e.g., `fill-white`, `stroke-gray-600`).
-- **Imports**: Follow the mandatory order: React → third-party (d3) → local (`../../types`, `./components`).
-- **Visual Verification**: Use `src/components/TestHarness/TestHarness.tsx` to verify component rendering as there is no automated test runner.
+⚠️ **CRITICAL: SOURCE OF TRUTH** ⚠️
+
+The detailed rules, architectural guidelines, and coding standards for this project have been consolidated.
+
+**You MUST read the following file immediately:**
+`AGENTS.md` (in the project root)
+
+All instructions regarding:
+
+- Visualization Architecture
+- Testing (Visual TDD)
+- Coding Standards (D3, Tailwind)
+- Debugging
+
+...are contained in that file. Do not rely on generic knowledge; follow the root `AGENTS.md` strictly.

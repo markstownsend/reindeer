@@ -1,5 +1,17 @@
-# Ask Mode Rules (Non-Obvious Only)
+# Agent Rules
 
-- **Backlog Status**: Check `backlog/tasks/` for the current roadmap and implementation status of visualization components.
-- **Design Specs**: Consult `design/reindeer-grammar.md` for specific rules on how activities are mapped to the visualization (e.g., beam displacement, antlers).
-- **Implementation Guide**: Refer to `implement/CODEASSIST.md` for the mandatory TDD/SOP workflow.
+⚠️ **CRITICAL: SOURCE OF TRUTH** ⚠️
+
+The detailed rules, architectural guidelines, and coding standards for this project have been consolidated.
+
+**You MUST read the following file immediately:**
+`AGENTS.md` (in the project root)
+
+All instructions regarding:
+
+- Visualization Architecture
+- Testing (Visual TDD)
+- Coding Standards (D3, Tailwind)
+- Debugging
+
+...are contained in that file. Do not rely on generic knowledge; follow the root `AGENTS.md` strictly.

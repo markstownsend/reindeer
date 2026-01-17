@@ -8,6 +8,8 @@ The "Reindeer Chart" is a vertical timeline visualization named for its resembla
 
 ## Visual Structure (based on sketch)
 
+![reindeer visualization overview](./design/reindeer-overview-001.jpg)
+
 ### 1. Layout
 
 - **Orientation**: Vertical
@@ -58,3 +60,35 @@ The "Reindeer Chart" is a vertical timeline visualization named for its resembla
 - **Library**: D3.js for rendering SVG primitives.
 - **Integration**: React component wrapper (`ReindeerChart`).
 - **Styling**: Tailwind CSS for container layout, D3/CSS for internal SVG styling.
+
+## Configuration & Theming
+
+The component is designed to be agnostic of your specific business logic (e.g., stage names, roles) by using a **Configuration Prop**.
+
+### Style Mapping Strategy
+
+To customize the look of data elements based on their values (e.g., coloring opportunities by 'Stage'), pass a `config` object to the `ReindeerChart`. This maps your data values to **Tailwind CSS classes**.
+
+```tsx
+const myConfig = {
+  // Map your specific data values to Tailwind classes
+  stageStyles: {
+    Discovery: "fill-indigo-300 stroke-indigo-500",
+    Proposal: "fill-purple-400 stroke-purple-600",
+    "Closed Won": "fill-green-500 animate-pulse", // You can use animations!
+  },
+  roleStyles: {
+    "Account Executive": "fill-red-500",
+    CTO: "fill-amber-400 border-2 border-white",
+  },
+  // Fallback for unknown values
+  defaultStyle: "fill-gray-400 stroke-gray-600",
+};
+
+<ReindeerChart data={data} config={myConfig} />;
+```
+
+This ensures that:
+
+1.  **Flexibility**: You can change colors, strokes, or add animations without touching the core component code.
+2.  **Clarity**: All visual definitions are centralized in your config, not hidden in D3 logic.

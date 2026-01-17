@@ -1,6 +1,7 @@
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
   "timestamp": "2023-10-27T10:00:00Z",
+  "location": "Tokyo, Japan",
   "sellers": [
     {
       "name": "Alice Smith",
@@ -8,7 +9,7 @@
     },
     {
       "name": "Bob Jones",
-      "role": "Sales Engineer"
+      "role": "Solutions Architect"
     }
   ],
   "customers": [
@@ -24,16 +25,20 @@
   "description": "Initial discovery meeting to discuss project requirements and potential fit.",
   "linkedOpportunities": [
     {
-      "closeDate": "2023-12-15",
+      "closeDate": "2026-12-15",
       "stage": "Discovery",
       "revenue": 50000,
-      "stageAdjustedRevenue": 10000
+      "stageAdjustedRevenue": 10000,
+      "description": "pricing grid",
+      "opportunityType": "core services"
     },
     {
-      "closeDate": "2024-01-30",
+      "closeDate": "2026-01-30",
       "stage": "Proposal",
       "revenue": 75000,
-      "stageAdjustedRevenue": 37500
+      "stageAdjustedRevenue": 37500,
+      "description": "graviton usage",
+      "opportunityType": "core services"
     }
   ]
 }
