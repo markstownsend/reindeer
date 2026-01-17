@@ -12,7 +12,6 @@ export default tseslint.config(
       "*.json",
       "*.md",
       "public/**",
-      "backlog/**",
       "design/**",
     ],
   },

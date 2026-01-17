@@ -1,5 +1,17 @@
-# Architect Mode Rules (Non-Obvious Only)
+# Agent Rules
 
-- **Component Layering**: The visualization follows a specific layering order (Face -> Antlers -> Beams -> Burr) defined in `design/reindeer-root.md`.
-- **Data Transformation**: The core architectural challenge is mapping `activity_example.json` schema to the `ReindeerChart` component's internal state.
-- **Responsiveness**: The chart must be designed to re-calculate D3 scales and positions when container dimensions change, handled via `useEffect` in `ReindeerChart.tsx`.
+⚠️ **CRITICAL: SOURCE OF TRUTH** ⚠️
+
+The detailed rules, architectural guidelines, and coding standards for this project have been consolidated.
+
+**You MUST read the following file immediately:**
+`AGENTS.md` (in the project root)
+
+All instructions regarding:
+
+- Visualization Architecture
+- Testing (Visual TDD)
+- Coding Standards (D3, Tailwind)
+- Debugging
+
+...are contained in that file. Do not rely on generic knowledge; follow the root `AGENTS.md` strictly.

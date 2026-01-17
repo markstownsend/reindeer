@@ -1,5 +1,17 @@
-# Debug Mode Rules (Non-Obvious Only)
+# Agent Rules
 
-- **Test Harness Dataset**: Mock datasets for debugging are located in `src/components/TestHarness/mockData.ts`.
-- **D3 Selection Debugging**: When inspecting SVG elements, remember that D3 selections are often cleared and redrawn on React state changes.
-- **Tailwind JIT**: Tailwind v4 is used; if styles aren't applying, check if classes are being dynamically generated in a way that bypasses the scanner.
+⚠️ **CRITICAL: SOURCE OF TRUTH** ⚠️
+
+The detailed rules, architectural guidelines, and coding standards for this project have been consolidated.
+
+**You MUST read the following file immediately:**
+`AGENTS.md` (in the project root)
+
+All instructions regarding:
+
+- Visualization Architecture
+- Testing (Visual TDD)
+- Coding Standards (D3, Tailwind)
+- Debugging
+
+...are contained in that file. Do not rely on generic knowledge; follow the root `AGENTS.md` strictly.
