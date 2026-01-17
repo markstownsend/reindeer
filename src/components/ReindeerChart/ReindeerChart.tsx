@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
-import { Activity } from "../../types";
+import { Activity } from "../../types/reindeer";
 
 interface ReindeerChartProps {
   width?: number;
