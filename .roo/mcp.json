@@ -1,11 +1,34 @@
 {
   "mcpServers": {
-    "tessl": { "type": "stdio", "command": "tessl", "args": ["mcp", "start"] },
-    "agent-sops": { "command": "strands-agents-sops", "args": ["mcp"] },
+    "tessl": {
+      "type": "stdio",
+      "command": "tessl",
+      "args": ["mcp", "start"]
+    },
+    "agent-sops": {
+      "command": "strands-agents-sops",
+      "args": ["mcp"]
+    },
     "chrome-devtools": {
       "args": ["-y", "chrome-devtools-mcp@latest"],
       "command": "npx",
-      "disabled": false
+      "disabled": false,
+      "alwaysAllow": [
+        "list_network_requests",
+        "list_console_messages",
+        "take_screenshot",
+        "navigate_page",
+        "take_snapshot",
+        "resize_page",
+        "evaluate_script",
+        "click",
+        "fill",
+        "list_pages",
+        "wait_for",
+        "new_page",
+        "press_key",
+        "close_page"
+      ]
     }
   }
 }
