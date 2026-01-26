@@ -297,10 +297,34 @@ export const ReindeerChart: React.FC<ReindeerChartProps> = ({
           .attr("class", "fill-gray-800")
           .attr("rx", 2);
 
-        let xOffset = faceLeft;
+        // Calculate initial bar widths based on revenue
+        const initialBarWidths = bucket.opportunities.map((opp) =>
+          Math.max(minBarWidth, revenueScale(opp.revenue)),
+        );
+        const totalInitialBarWidth = initialBarWidths.reduce(
+          (sum, width) => sum + width,
+          0,
+        );
+        const totalSpacing = (initialBarWidths.length - 1) * 2; // 2px spacing between bars
+        const totalInitialWidth = totalInitialBarWidth + totalSpacing;
 
-        for (const opp of bucket.opportunities) {
-          const barWidth = Math.max(minBarWidth, revenueScale(opp.revenue));
+        // Calculate scaling factor if bars exceed face width
+        // Scale only the bar widths, not the spacing
+        const scalingFactor =
+          totalInitialWidth > faceWidth
+            ? (faceWidth - totalSpacing) / totalInitialBarWidth
+            : 1;
+
+        let xOffset = faceLeft;
+        let totalBarWidth = 0;
+
+        for (let i = 0; i < bucket.opportunities.length; i++) {
+          const opp = bucket.opportunities[i];
+          const unscaledWidth = initialBarWidths[i];
+          const barWidth = unscaledWidth * scalingFactor;
+          // Add spacing between bars (not after the last one)
+          const spacing = i < bucket.opportunities.length - 1 ? 2 : 0;
+          totalBarWidth += barWidth + spacing;
 
           const oppGroup = faceLayer
             .append("g")
