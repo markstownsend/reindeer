@@ -5,18 +5,18 @@ import tseslint from "typescript-eslint";
 import prettierConfig from "eslint-config-prettier";
 
 export default tseslint.config(
-    {
-      ignores: [
-        "package.json",
-        "package-lock.json",
-        "*.json",
-        "*.md",
-        "public/**",
-        "design/**",
-        "node_modules/**",
-        "dist/**",
-      ],
-    },
+  {
+    ignores: [
+      "package.json",
+      "package-lock.json",
+      "*.json",
+      "*.md",
+      "public/**",
+      "design/**",
+      "node_modules/**",
+      "dist/**",
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -41,8 +41,36 @@ export default tseslint.config(
       },
     },
     rules: {
+      // React Recommended Rules
       ...reactPlugin.configs.recommended.rules,
+      ...reactPlugin.configs["jsx-runtime"].rules,
+
+      // React Customizations
       "react/react-in-jsx-scope": "off",
+      "react/prop-types": "off",
+      "react/self-closing-comp": "warn",
+      "react/no-unknown-property": "error",
+
+      // TypeScript & Variables
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/consistent-type-imports": [
+        "warn",
+        { prefer: "type-imports" },
+      ],
+
+      // General Code Quality
+      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "no-debugger": "warn",
+      eqeqeq: ["error", "always"],
+      curly: ["error", "all"],
     },
   },
   prettierConfig,
