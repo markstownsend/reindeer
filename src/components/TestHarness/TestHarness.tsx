@@ -8,6 +8,8 @@ export const TestHarness: React.FC = () => {
   >("Typical (3 Activities, 2 Opps)");
   const [width, setWidth] = useState(1000);
   const [height, setHeight] = useState(800);
+  const [faceWidthRatio, setFaceWidthRatio] = useState(0.6);
+  const [activitiesHeightRatio, setActivitiesHeightRatio] = useState(0.5);
 
   const data = datasets[selectedDatasetName];
 
@@ -75,6 +77,42 @@ export const TestHarness: React.FC = () => {
                 className="w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
               />
             </div>
+            <div>
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-gray-400">Face Width Ratio</span>
+                <span className="font-mono text-blue-400">
+                  {(faceWidthRatio * 100).toFixed(0)}%
+                </span>
+              </div>
+              <input
+                type="range"
+                min="0.1"
+                max="1.0"
+                step="0.1"
+                value={faceWidthRatio}
+                onChange={(e) => setFaceWidthRatio(parseFloat(e.target.value))}
+                className="w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+              />
+            </div>
+            <div>
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-gray-400">Activities Height Ratio</span>
+                <span className="font-mono text-purple-400">
+                  {(activitiesHeightRatio * 100).toFixed(0)}%
+                </span>
+              </div>
+              <input
+                type="range"
+                min="0.1"
+                max="0.9"
+                step="0.1"
+                value={activitiesHeightRatio}
+                onChange={(e) =>
+                  setActivitiesHeightRatio(parseFloat(e.target.value))
+                }
+                className="w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
+              />
+            </div>
           </section>
 
           <section className="pt-4 border-t border-gray-800 text-xs text-gray-500">
@@ -92,7 +130,13 @@ export const TestHarness: React.FC = () => {
         {/* Preview Area */}
         <main className="flex-1">
           <div className="bg-gray-800 rounded-xl p-6 shadow-2xl border border-gray-700 overflow-auto flex justify-center items-start min-h-[600px]">
-            <ReindeerChart width={width} height={height} data={data} />
+            <ReindeerChart
+              width={width}
+              height={height}
+              data={data}
+              faceWidthRatio={faceWidthRatio}
+              activitiesHeightRatio={activitiesHeightRatio}
+            />
           </div>
         </main>
       </div>
