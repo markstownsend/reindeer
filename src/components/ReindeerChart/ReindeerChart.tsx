@@ -372,33 +372,6 @@ export const ReindeerChart: React.FC<ReindeerChartProps> = ({
       }
     }
 
-    const legendY = height - 25;
-    const legendX = faceLeft;
-    const legendItems = Object.entries(STAGE_COLORS);
-    const legendSpacing = 100;
-
-    for (let i = 0; i < legendItems.length; i++) {
-      const [stage, colorClass] = legendItems[i];
-      const itemX = legendX + i * legendSpacing;
-
-      faceLayer
-        .append("rect")
-        .attr("x", itemX)
-        .attr("y", legendY)
-        .attr("width", 12)
-        .attr("height", 12)
-        .attr("class", colorClass)
-        .attr("rx", 2);
-
-      faceLayer
-        .append("text")
-        .attr("x", itemX + 16)
-        .attr("y", legendY + 6)
-        .attr("dominant-baseline", "middle")
-        .attr("class", "fill-gray-400 text-xs")
-        .text(stage);
-    }
-
     svg
       .append("line")
       .attr("x1", width / 2)
