@@ -705,6 +705,138 @@ export const teethStageDistribution: Activity[] = [
   },
 ];
 
+const STAGE_SEQUENCE = [
+  "Discovery",
+  "Qualified",
+  "Proposal",
+  "Closing",
+  "Closed Won",
+  "Closed Lost",
+];
+
+function buildLongRangeScenario(options: {
+  prefix: string;
+  startYear: number;
+  years: number;
+  opportunitiesCount: number;
+  activitiesPerOpportunity: number;
+  revenueBase: number;
+}): Activity[] {
+  const {
+    prefix,
+    startYear,
+    years,
+    opportunitiesCount,
+    activitiesPerOpportunity,
+    revenueBase,
+  } = options;
+
+  const sellerPool = [
+    { name: "Alice Smith", role: "Account Executive" },
+    { name: "Bob Jones", role: "Sales Engineer" },
+    { name: "Carol White", role: "Enterprise AE" },
+    { name: "Dan Wright", role: "Solutions Consultant" },
+  ];
+
+  const customerPool = [
+    { name: "Charlie Brown", role: "CTO" },
+    { name: "Diana Prince", role: "VP Engineering" },
+    { name: "Eve Green", role: "CFO" },
+    { name: "Frank Black", role: "COO" },
+    { name: "Grace Lee", role: "Head of IT" },
+  ];
+
+  const totalMonths = years * 12;
+  const activities: Activity[] = [];
+
+  for (let oppIndex = 0; oppIndex < opportunitiesCount; oppIndex++) {
+    const monthOffset = Math.floor(
+      (oppIndex / Math.max(1, opportunitiesCount - 1)) *
+        Math.max(0, totalMonths - 1),
+    );
+
+    const closeDate = new Date(
+      Date.UTC(startYear, 0 + monthOffset, 20 + (oppIndex % 7)),
+    );
+
+    const finalStageIndex = oppIndex % STAGE_SEQUENCE.length;
+    const revenue = revenueBase + (oppIndex % 10) * 20000 + oppIndex * 5000;
+
+    for (
+      let activityStep = 0;
+      activityStep < activitiesPerOpportunity;
+      activityStep++
+    ) {
+      const daysBeforeClose = 90 - activityStep * 28 + (oppIndex % 9);
+      const timestamp = new Date(
+        closeDate.getTime() - daysBeforeClose * 86400000,
+      );
+
+      const stageIndex = Math.max(
+        0,
+        finalStageIndex - (activitiesPerOpportunity - 1 - activityStep),
+      );
+      const activityStage = STAGE_SEQUENCE[stageIndex];
+
+      activities.push({
+        id: `${prefix}-activity-${oppIndex + 1}-${activityStep + 1}`,
+        timestamp: timestamp.toISOString(),
+        sellers:
+          activityStep % 2 === 0
+            ? [sellerPool[oppIndex % sellerPool.length]]
+            : [
+                sellerPool[oppIndex % sellerPool.length],
+                sellerPool[(oppIndex + 1) % sellerPool.length],
+              ],
+        customers: [
+          customerPool[(oppIndex + activityStep) % customerPool.length],
+        ],
+        description: `Pipeline touchpoint ${activityStep + 1} for opportunity ${
+          oppIndex + 1
+        }`,
+        linkedOpportunities: [
+          {
+            id: `${prefix}-opp-${oppIndex + 1}`,
+            closeDate: closeDate.toISOString().slice(0, 10),
+            stage: activityStage,
+            revenue,
+            stageAdjustedRevenue: Math.round(revenue * (stageIndex + 1) * 0.12),
+          },
+        ],
+      });
+    }
+  }
+
+  return activities;
+}
+
+export const timelineThreeYearStageMix = buildLongRangeScenario({
+  prefix: "timeline-3y",
+  startYear: 2022,
+  years: 3,
+  opportunitiesCount: 24,
+  activitiesPerOpportunity: 2,
+  revenueBase: 40000,
+});
+
+export const timelineFiveYearDense = buildLongRangeScenario({
+  prefix: "timeline-5y",
+  startYear: 2020,
+  years: 5,
+  opportunitiesCount: 30,
+  activitiesPerOpportunity: 2,
+  revenueBase: 60000,
+});
+
+export const timelineSevenYearLongTail = buildLongRangeScenario({
+  prefix: "timeline-7y",
+  startYear: 2018,
+  years: 7,
+  opportunitiesCount: 28,
+  activitiesPerOpportunity: 3,
+  revenueBase: 50000,
+});
+
 export const datasets = {
   "Small (1 Activity)": smallDataset,
   "Typical (3 Activities, 2 Opps)": typicalDataset,
@@ -720,6 +852,11 @@ export const datasets = {
   "Multi-Scale: Opportunities Only": multiScaleOpportunitiesOnly,
   "Multi-Scale: Both Sections": multiScaleBothSections,
   "Teeth: Stage Distribution": teethStageDistribution,
+  "Timeline: 3-Year Stage Mix (48 Activities, 24 Opps)":
+    timelineThreeYearStageMix,
+  "Timeline: 5-Year Dense (60 Activities, 30 Opps)": timelineFiveYearDense,
+  "Timeline: 7-Year Long Tail (84 Activities, 28 Opps)":
+    timelineSevenYearLongTail,
   "Mixed: Bound and Free Activities": [
     ...multiScaleBothSections,
     {

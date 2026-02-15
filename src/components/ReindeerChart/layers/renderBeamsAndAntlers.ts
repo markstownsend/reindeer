@@ -28,6 +28,66 @@ export function renderBeamsAndAntlers(
   const { beams, layout, scales, opportunityPositions } = options;
   const { activitiesTimeScale } = scales;
 
+  // Render faint monthly timeline gridlines within the activities section
+  const tickFormatter = d3.timeFormat("%m-%y");
+  const monthlyTicks = activitiesTimeScale.ticks(d3.timeMonth.every(1));
+  const activitiesTop = layout.margin.top;
+  const activitiesBottom = layout.margin.top + layout.activitiesHeight;
+  const timelineTicksInRange = monthlyTicks.filter((tick) => {
+    const y = activitiesTimeScale(tick);
+    return y >= activitiesTop && y <= activitiesBottom;
+  });
+
+  const tickStep = Math.max(1, Math.ceil(timelineTicksInRange.length / 10));
+  const timelineTicks = timelineTicksInRange.filter(
+    (_, index) => index % tickStep === 0,
+  );
+
+  const timelineClipPathId = "activity-timeline-clip";
+  beamsLayer
+    .append("clipPath")
+    .attr("id", timelineClipPathId)
+    .append("rect")
+    .attr("x", layout.margin.left)
+    .attr("y", activitiesTop)
+    .attr("width", layout.width - layout.margin.left - layout.margin.right)
+    .attr("height", layout.activitiesHeight);
+
+  const timelineGridGroup = beamsLayer
+    .append("g")
+    .attr("class", "activity-timeline-grid")
+    .attr("clip-path", `url(#${timelineClipPathId})`);
+
+  timelineGridGroup
+    .selectAll(".timeline-gridline")
+    .data(timelineTicks)
+    .enter()
+    .append("line")
+    .attr("class", "timeline-gridline stroke-gray-500")
+    .attr("stroke-opacity", 0.25)
+    .attr("stroke-width", 1)
+    .attr("x1", layout.margin.left)
+    .attr("x2", layout.width - layout.margin.right)
+    .attr("y1", (d) => activitiesTimeScale(d))
+    .attr("y2", (d) => activitiesTimeScale(d));
+
+  const timelineLabelGroup = beamsLayer
+    .append("g")
+    .attr("class", "activity-timeline-labels");
+
+  timelineLabelGroup
+    .selectAll(".timeline-gridlabel")
+    .data(timelineTicks)
+    .enter()
+    .append("text")
+    .attr("class", "timeline-gridlabel fill-gray-400 text-[10px]")
+    .attr("x", layout.margin.left - 10)
+    .attr("y", (d) => activitiesTimeScale(d))
+    .attr("text-anchor", "end")
+    .attr("dominant-baseline", "middle")
+    .attr("opacity", 0.9)
+    .text((d) => tickFormatter(d));
+
   if (beams.length === 0) {
     return;
   }

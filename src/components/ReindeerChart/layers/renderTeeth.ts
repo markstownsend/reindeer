@@ -39,14 +39,6 @@ export function renderTeeth(
   const lowerMaxHeight = Math.max(0, teethBottom - baselineY - 18);
 
   teethLayer
-    .append("text")
-    .attr("x", faceLeft + faceWidth / 2)
-    .attr("y", teethTop + 12)
-    .attr("text-anchor", "middle")
-    .attr("class", "fill-gray-300 text-xs font-medium")
-    .text("Stage Teeth");
-
-  teethLayer
     .append("line")
     .attr("x1", faceLeft)
     .attr("y1", baselineY)
