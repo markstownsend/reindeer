@@ -61,30 +61,54 @@ export function renderFace(
     return opportunityPositions;
   }
 
+  // Calculate face boundary with padding
+  const facePadding = 30;
+  const faceBoundaryTop = margin.top + activitiesHeight + facePadding;
+  const faceBoundaryHeight = opportunitiesHeight - facePadding * 2;
+
+  // Face boundary rectangle (surrounds all opportunities)
+  faceLayer
+    .append("rect")
+    .attr("x", faceLeft)
+    .attr("y", faceBoundaryTop)
+    .attr("width", faceWidth)
+    .attr("height", faceBoundaryHeight)
+    .attr("class", "fill-transparent stroke-orange-500")
+    .attr("stroke-width", 2)
+    .attr("rx", 8);
+
+  // Create a scale that maps to the padded face boundary
+  const originalDomain = opportunitiesTimeScale.domain();
+  const paddedTimeScale = d3
+    .scaleTime()
+    .domain(originalDomain)
+    .range([faceBoundaryTop, faceBoundaryTop + faceBoundaryHeight - barHeight]);
+
   // Render year groups and buckets
   for (const yearGroup of yearGroups) {
     // Render buckets
     for (const bucket of yearGroup.buckets) {
       const monthLabel = getMonthYearLabel(bucket.year, bucket.month);
       const bucketDate = new Date(bucket.year, bucket.month, 1);
-      const bucketY = opportunitiesTimeScale(bucketDate);
+      // Use padded scale to fit buckets inside the face boundary
+      const bucketY = paddedTimeScale(bucketDate);
 
-      // Month label
+      // Month label (inside the boundary rectangle)
       faceLayer
         .append("text")
-        .attr("x", faceLeft - 10)
+        .attr("x", faceLeft + facePadding)
         .attr("y", bucketY + barHeight / 2)
-        .attr("text-anchor", "end")
+        .attr("text-anchor", "start")
         .attr("dominant-baseline", "middle")
-        .attr("class", "fill-gray-400 text-xs")
+        .attr("class", "fill-orange-300 text-xs font-medium")
         .text(monthLabel);
 
       // Bucket background
       faceLayer
         .append("rect")
-        .attr("x", faceLeft)
+        .attr("x", faceLeft + facePadding)
         .attr("y", bucketY)
-        .attr("width", faceWidth)
+        .attr("width", faceWidth - facePadding * 2)
         .attr("height", barHeight)
         .attr("class", "fill-gray-800")
         .attr("rx", 2);
@@ -98,15 +122,16 @@ export function renderFace(
         0,
       );
       const totalSpacing = (initialBarWidths.length - 1) * 2;
+      const availableWidth = faceWidth - facePadding * 2;
       const totalInitialWidth = totalInitialBarWidth + totalSpacing;
 
       // Scaling factor if bars exceed face width
       const scalingFactor =
-        totalInitialWidth > faceWidth
-          ? (faceWidth - totalSpacing) / totalInitialBarWidth
+        totalInitialWidth > availableWidth
+          ? (availableWidth - totalSpacing) / totalInitialBarWidth
           : 1;
 
-      let xOffset = faceLeft;
+      let xOffset = faceLeft + facePadding;
 
       for (let i = 0; i < bucket.opportunities.length; i++) {
         const opp = bucket.opportunities[i];
