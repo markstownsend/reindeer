@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { YearGroup, getMonthName } from "../../../utils/dataTransform";
+import { YearGroup, getMonthYearLabel } from "../../../utils/dataTransform";
 import { LayoutDimensions, ChartScales } from "../../../utils/scales";
 import { STAGE_COLORS, DEFAULT_STAGE_COLOR } from "./styles";
 
@@ -88,7 +88,7 @@ export function renderFace(
 
     // Render buckets
     for (const bucket of yearGroup.buckets) {
-      const monthLabel = getMonthName(bucket.month);
+      const monthLabel = getMonthYearLabel(bucket.year, bucket.month);
       const bucketDate = new Date(bucket.year, bucket.month, 1);
       const bucketY = opportunitiesTimeScale(bucketDate);
 

@@ -31,12 +31,15 @@ export function getBucketId(year: number, month: number): string {
 }
 
 export function extractOpportunitiesFromActivities(
-  activities: Activity[]
+  activities: Activity[],
 ): Opportunity[] {
   const opportunities: Opportunity[] = [];
 
   for (const activity of activities) {
-    if (activity.linkedOpportunities && activity.linkedOpportunities.length > 0) {
+    if (
+      activity.linkedOpportunities &&
+      activity.linkedOpportunities.length > 0
+    ) {
       opportunities.push(...activity.linkedOpportunities);
     }
   }
@@ -44,9 +47,7 @@ export function extractOpportunitiesFromActivities(
   return opportunities;
 }
 
-export function groupOpportunitiesByMonth(
-  activities: Activity[]
-): YearGroup[] {
+export function groupOpportunitiesByMonth(activities: Activity[]): YearGroup[] {
   const opportunities = extractOpportunitiesFromActivities(activities);
 
   const bucketMap = new Map<string, MonthlyBucket>();
@@ -138,4 +139,10 @@ export function getMonthName(month: number): string {
     "Dec",
   ];
   return monthNames[month] || "";
+}
+
+export function getMonthYearLabel(year: number, month: number): string {
+  const shortMonth = getMonthName(month);
+  const shortYear = year.toString().slice(-2);
+  return `${shortMonth} '${shortYear}`;
 }
