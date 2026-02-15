@@ -95,6 +95,7 @@ export const ReindeerChart: React.FC<ReindeerChartProps> = ({
       layout,
       scales,
       height,
+      opportunityPositions,
     });
 
     // Render burrs

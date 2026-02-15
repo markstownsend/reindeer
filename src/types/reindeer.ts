@@ -43,6 +43,8 @@ export interface Beam {
   ordinalPosition: number;
   verticalExtent: { min: Date; max: Date };
   burrConnection: { x: number; y: number };
+  type: "bound" | "free";
+  linkedOpportunityId?: string;
 }
 
 /**

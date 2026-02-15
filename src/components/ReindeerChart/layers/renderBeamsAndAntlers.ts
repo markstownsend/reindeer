@@ -13,6 +13,7 @@ export interface RenderBeamsAndAntlersOptions {
   layout: LayoutDimensions;
   scales: ChartScales;
   height: number;
+  opportunityPositions: Map<string, { x: number; y: number }>;
 }
 
 /**
@@ -24,7 +25,7 @@ export function renderBeamsAndAntlers(
   antlersLayer: d3.Selection<SVGGElement, unknown, null, undefined>,
   options: RenderBeamsAndAntlersOptions,
 ): void {
-  const { beams, layout, scales, height } = options;
+  const { beams, layout, scales, opportunityPositions } = options;
   const { margin } = layout;
   const { activitiesTimeScale } = scales;
 
@@ -32,9 +33,9 @@ export function renderBeamsAndAntlers(
     return;
   }
 
-  // Create beam X scale based on actual ordinal positions
+  // Create beam X scale based on actual ordinal positions and layout
   const ordinalPositions = beams.map((b) => b.ordinalPosition);
-  const beamXScale = createBeamXScale(ordinalPositions, layout.width, margin);
+  const beamXScale = createBeamXScale(ordinalPositions, layout);
 
   // Render beam edges (vertical lines)
   beamsLayer
@@ -46,7 +47,21 @@ export function renderBeamsAndAntlers(
     .attr("x1", (d) => beamXScale(d.ordinalPosition))
     .attr("x2", (d) => beamXScale(d.ordinalPosition))
     .attr("y1", (d) => activitiesTimeScale(d.verticalExtent.min))
-    .attr("y2", (d) => activitiesTimeScale(d.verticalExtent.max));
+    .attr("y2", (d) => {
+      // Extend beam down to its connection point
+      if (d.type === "bound" && d.linkedOpportunityId) {
+        // Connect to opportunity Y
+        const oppPos = opportunityPositions.get(d.linkedOpportunityId);
+        if (oppPos) {
+          return oppPos.y;
+        }
+      } else if (d.type === "free") {
+        // Connect to top edge of face (activities/opportunities boundary)
+        return layout.margin.top + layout.activitiesHeight;
+      }
+      // Fallback to max activity time
+      return activitiesTimeScale(d.verticalExtent.max);
+    });
 
   // Render activity nodes on antlers
   beams.forEach((beam) => {
