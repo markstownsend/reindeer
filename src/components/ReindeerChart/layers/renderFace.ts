@@ -63,29 +63,6 @@ export function renderFace(
 
   // Render year groups and buckets
   for (const yearGroup of yearGroups) {
-    // Year label
-    const yearStartDate = new Date(yearGroup.year, 0, 1);
-    const yearY = opportunitiesTimeScale(yearStartDate);
-
-    faceLayer
-      .append("text")
-      .attr("x", faceLeft - 10)
-      .attr("y", yearY)
-      .attr("text-anchor", "end")
-      .attr("dominant-baseline", "middle")
-      .attr("class", "fill-white text-sm font-bold")
-      .text(yearGroup.year.toString());
-
-    // Year separator line
-    faceLayer
-      .append("line")
-      .attr("x1", faceLeft)
-      .attr("y1", yearY)
-      .attr("x2", faceLeft + faceWidth)
-      .attr("y2", yearY)
-      .attr("stroke", "#374151")
-      .attr("stroke-width", 1);
-
     // Render buckets
     for (const bucket of yearGroup.buckets) {
       const monthLabel = getMonthYearLabel(bucket.year, bucket.month);
