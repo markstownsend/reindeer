@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
-import { Activity } from "../../types/reindeer";
-import { groupOpportunitiesByMonth } from "../../utils/dataTransform";
+import type { Activity } from "../../types/reindeer";
+import { aggregateFaceData } from "../../utils/faceAggregation";
 import { calculateBeamPositions } from "../../utils/beamAggregation";
 import {
   calculateLayout,
@@ -40,7 +40,8 @@ export const ReindeerChart: React.FC<ReindeerChartProps> = ({
     const burrsLayer = svg.append("g").attr("id", "layer-burrs");
 
     // Calculate data
-    const yearGroups = groupOpportunitiesByMonth(data);
+    // Use aggregateFaceData with initial defaults; layout properties will be updated later
+    const { buckets, stacked } = aggregateFaceData(data);
     const beams = calculateBeamPositions(data);
 
     // Calculate layout
@@ -50,10 +51,10 @@ export const ReindeerChart: React.FC<ReindeerChartProps> = ({
       faceWidthRatio,
       activitiesHeightRatio,
     );
-    layout = updateLayoutWithBuckets(layout, yearGroups);
+    layout = updateLayoutWithBuckets(layout, buckets);
 
     // Create scales
-    const scales = createScales(data, yearGroups, layout);
+    const scales = createScales(data, buckets, layout);
 
     // Check for empty activities
     const activityTimestamps = data.map((a) => new Date(a.timestamp));
@@ -69,7 +70,8 @@ export const ReindeerChart: React.FC<ReindeerChartProps> = ({
 
     // Render face layer (returns opportunity positions for burr connections)
     const opportunityPositions = renderFace(faceLayer, {
-      yearGroups,
+      buckets,
+      stacked,
       layout,
       scales,
       width,

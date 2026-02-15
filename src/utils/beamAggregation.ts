@@ -1,4 +1,4 @@
-import { Activity, Beam } from "../types/reindeer";
+import type { Activity, Beam } from "../types/reindeer";
 
 /**
  * Groups activities by their linked opportunity ID.

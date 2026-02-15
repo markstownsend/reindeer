@@ -1,9 +1,6 @@
-import { Beam } from "../../../types/reindeer";
-import {
-  ChartScales,
-  LayoutDimensions,
-  createBeamXScale,
-} from "../../../utils/scales";
+import type { Beam } from "../../../types/reindeer";
+import type { ChartScales, LayoutDimensions } from "../../../utils/scales";
+import { createBeamXScale } from "../../../utils/scales";
 
 export interface RenderBurrsOptions {
   beams: Beam[];
