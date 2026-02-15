@@ -1,4 +1,4 @@
-import { Activity, Beam, Opportunity } from "../types/reindeer";
+import { Activity, Beam } from "../types/reindeer";
 
 /**
  * Groups activities by their linked opportunity ID.
@@ -34,7 +34,6 @@ export function calculateBeamPositions(activities: Activity[]): Beam[] {
 
   // Step 2: Create a list of unique opportunities with their total revenue
   const opportunityRevenueMap = new Map<string, number>();
-  const opportunityMap = new Map<string, Opportunity>();
 
   for (const activity of activities) {
     for (const opportunity of activity.linkedOpportunities) {
@@ -43,7 +42,6 @@ export function calculateBeamPositions(activities: Activity[]): Beam[] {
         opportunity.id,
         currentRevenue + opportunity.revenue,
       );
-      opportunityMap.set(opportunity.id, opportunity);
     }
   }
 
@@ -60,8 +58,7 @@ export function calculateBeamPositions(activities: Activity[]): Beam[] {
   const beams: Beam[] = [];
 
   for (let i = 0; i < sortedOpportunities.length; i++) {
-    const [oppId, _] = sortedOpportunities[i];
-    const opportunity = opportunityMap.get(oppId)!;
+    const [oppId] = sortedOpportunities[i];
     const beamActivities = activityMap.get(oppId) || [];
 
     // Calculate ordinal position
