@@ -1,4 +1,4 @@
-import { Activity } from "../../types/reindeer";
+import type { Activity } from "../../types/reindeer";
 
 export const smallDataset: Activity[] = [
   {

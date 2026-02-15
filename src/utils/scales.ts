@@ -1,6 +1,5 @@
 import * as d3 from "d3";
-import { Activity } from "../types/reindeer";
-import { YearGroup } from "./dataTransform";
+import type { Activity, FaceBucket } from "../types/reindeer";
 
 export interface ChartScales {
   activitiesTimeScale: d3.ScaleTime<number, number, never>;
@@ -81,13 +80,9 @@ export function calculateLayout(
  */
 export function updateLayoutWithBuckets(
   layout: LayoutDimensions,
-  yearGroups: YearGroup[],
+  buckets: FaceBucket[],
 ): LayoutDimensions {
-  let totalBuckets = 0;
-  for (const yearGroup of yearGroups) {
-    totalBuckets += yearGroup.buckets.length;
-  }
-  totalBuckets += yearGroups.length;
+  const totalBuckets = buckets.length;
 
   const rowHeight =
     totalBuckets > 0
@@ -106,12 +101,12 @@ export function updateLayoutWithBuckets(
  */
 export function createScales(
   data: Activity[],
-  yearGroups: YearGroup[],
+  buckets: FaceBucket[],
   layout: LayoutDimensions,
 ): ChartScales {
   const { activitiesRange, opportunitiesRange, faceWidth, width, margin } =
     layout;
-  const maxRevenue = getMaxRevenue(yearGroups);
+  const maxRevenue = getMaxRevenue(buckets);
 
   // Revenue scale for bar widths
   const revenueScale = d3
@@ -180,16 +175,23 @@ export function createScales(
       .domain([domainMin, domainMax])
       .range(opportunitiesRange);
 
-    // Find earliest bucket date from yearGroups
+    // Find earliest bucket date from buckets
     let earliestBucketDate: Date | null = null;
-    for (const yearGroup of yearGroups) {
-      for (const bucket of yearGroup.buckets) {
-        const bucketDate = new Date(bucket.year, bucket.month, 1);
-        if (
-          !earliestBucketDate ||
-          bucketDate.getTime() < earliestBucketDate.getTime()
-        ) {
-          earliestBucketDate = bucketDate;
+    for (const bucket of buckets) {
+      // bucketId format "YYYY-MM" or "YYYY-Qn"
+      // Assuming "YYYY-MM" for now as per aggregateFaceData default
+      if (bucket.bucketId.includes("-")) {
+        const parts = bucket.bucketId.split("-");
+        if (parts.length === 2 && !bucket.bucketId.includes("Q")) {
+          const year = parseInt(parts[0], 10);
+          const month = parseInt(parts[1], 10) - 1; // 0-based
+          const bucketDate = new Date(year, month, 1);
+          if (
+            !earliestBucketDate ||
+            bucketDate.getTime() < earliestBucketDate.getTime()
+          ) {
+            earliestBucketDate = bucketDate;
+          }
         }
       }
     }
@@ -251,14 +253,12 @@ export function createBeamXScale(
 }
 
 // Re-export getMaxRevenue for convenience
-export function getMaxRevenue(yearGroups: YearGroup[]): number {
+export function getMaxRevenue(buckets: FaceBucket[]): number {
   let maxRevenue = 0;
-  for (const yearGroup of yearGroups) {
-    for (const bucket of yearGroup.buckets) {
-      for (const opp of bucket.opportunities) {
-        if (opp.revenue > maxRevenue) {
-          maxRevenue = opp.revenue;
-        }
+  for (const bucket of buckets) {
+    for (const opp of bucket.opportunities) {
+      if (opp.revenue > maxRevenue) {
+        maxRevenue = opp.revenue;
       }
     }
   }

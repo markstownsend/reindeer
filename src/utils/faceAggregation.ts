@@ -1,4 +1,4 @@
-import {
+import type {
   Activity,
   FaceBucket,
   Opportunity,
@@ -85,7 +85,7 @@ export function calculateFaceBuckets(
     buckets.push({
       bucketId: key,
       opportunities,
-      yPosition: i * layout.rowHeight,
+      yPosition: 0, // Placeholder, will be set by layout engine
       height: layout.rowHeight,
       totalRevenue,
       maxWidth: layout.maxWidth,

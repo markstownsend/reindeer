@@ -1,10 +1,7 @@
 import * as d3 from "d3";
-import { Beam } from "../../../types/reindeer";
-import {
-  ChartScales,
-  LayoutDimensions,
-  createBeamXScale,
-} from "../../../utils/scales";
+import type { Beam } from "../../../types/reindeer";
+import type { ChartScales, LayoutDimensions } from "../../../utils/scales";
+import { createBeamXScale } from "../../../utils/scales";
 import { STAGE_COLORS, DEFAULT_STAGE_COLOR } from "./styles";
 
 function getStageColor(stage: string): string {
