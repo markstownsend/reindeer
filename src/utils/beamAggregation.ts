@@ -10,6 +10,9 @@ export function groupActivitiesByOpportunity(
   const activityMap = new Map<string, Activity[]>();
 
   for (const activity of activities) {
+    if (activity.linkedOpportunities.length === 0) {
+      continue;
+    }
     for (const opportunity of activity.linkedOpportunities) {
       if (!activityMap.has(opportunity.id)) {
         activityMap.set(opportunity.id, []);
@@ -24,18 +27,47 @@ export function groupActivitiesByOpportunity(
 /**
  * Calculates beam positions for all opportunities.
  * This function implements the core logic for beam displacement:
- * 1. Unique opportunities are sorted by total revenue.
- * 2. Alternating ordinal positions (0, -1, 1, -2, 2...) are assigned based on revenue rank.
- * 3. Vertical extents (min/max timestamps) are calculated for each beam.
+ * 1. Separates opportunity-bound and opportunity-free activities.
+ * 2. Opportunity-bound activities follow the alternating ordinal logic (1, -1, 2, -2...) to be placed OUTSIDE the face.
+ * 3. Opportunity-free activities are grouped into a single beam at ordinal 0 to be placed INSIDE the face.
  */
 export function calculateBeamPositions(activities: Activity[]): Beam[] {
-  // Step 1: Group activities by opportunity
-  const activityMap = groupActivitiesByOpportunity(activities);
+  const beams: Beam[] = [];
 
-  // Step 2: Create a list of unique opportunities with their total revenue
-  const opportunityRevenueMap = new Map<string, number>();
+  // Step 1: Separate activities
+  const boundActivities: Activity[] = [];
+  const freeActivities: Activity[] = [];
 
   for (const activity of activities) {
+    if (activity.linkedOpportunities.length > 0) {
+      boundActivities.push(activity);
+    } else {
+      freeActivities.push(activity);
+    }
+  }
+
+  // Step 2: Process Opportunity-Free Activities (Ordinal 0)
+  if (freeActivities.length > 0) {
+    const timestamps = freeActivities.map((a) => new Date(a.timestamp));
+    const minDate = new Date(Math.min(...timestamps.map((d) => d.getTime())));
+    const maxDate = new Date(Math.max(...timestamps.map((d) => d.getTime())));
+
+    beams.push({
+      activities: freeActivities,
+      ordinalPosition: 0,
+      verticalExtent: { min: minDate, max: maxDate },
+      burrConnection: { x: 0, y: 0 },
+      type: "free",
+    });
+  }
+
+  // Step 3: Process Opportunity-Bound Activities
+  const activityMap = groupActivitiesByOpportunity(boundActivities);
+
+  // Create a list of unique opportunities with their total revenue
+  const opportunityRevenueMap = new Map<string, number>();
+
+  for (const activity of boundActivities) {
     for (const opportunity of activity.linkedOpportunities) {
       const currentRevenue = opportunityRevenueMap.get(opportunity.id) || 0;
       opportunityRevenueMap.set(
@@ -45,33 +77,29 @@ export function calculateBeamPositions(activities: Activity[]): Beam[] {
     }
   }
 
-  // Step 3: Sort opportunities by total revenue (descending)
+  // Sort opportunities by total revenue (descending)
   const sortedOpportunities = Array.from(opportunityRevenueMap.entries()).sort(
     (a, b) => b[1] - a[1],
   );
 
-  // Step 4: Assign alternating ordinal positions
-  // Rank 0 (largest) -> ordinal 0
+  // Assign alternating ordinal positions starting from 1/-1
+  // Rank 0 -> ordinal 1
   // Rank 1 -> ordinal -1
-  // Rank 2 -> ordinal 1
+  // Rank 2 -> ordinal 2
   // Rank 3 -> ordinal -2, etc.
-  const beams: Beam[] = [];
-
   for (let i = 0; i < sortedOpportunities.length; i++) {
     const [oppId] = sortedOpportunities[i];
     const beamActivities = activityMap.get(oppId) || [];
 
-    // Calculate ordinal position
+    // Calculate ordinal position (skipping 0)
     let ordinalPosition: number;
-    if (i === 0) {
-      ordinalPosition = 0;
-    } else if (i % 2 === 1) {
-      ordinalPosition = -Math.ceil(i / 2);
+    if (i % 2 === 0) {
+      ordinalPosition = Math.ceil((i + 1) / 2); // 1, 2, 3...
     } else {
-      ordinalPosition = Math.ceil(i / 2);
+      ordinalPosition = -Math.ceil((i + 1) / 2); // -1, -2, -3...
     }
 
-    // Calculate vertical extent (min and max timestamps)
+    // Calculate vertical extent
     const timestamps = beamActivities.map((a) => new Date(a.timestamp));
     const minDate = new Date(Math.min(...timestamps.map((d) => d.getTime())));
     const maxDate = new Date(Math.max(...timestamps.map((d) => d.getTime())));
@@ -80,7 +108,9 @@ export function calculateBeamPositions(activities: Activity[]): Beam[] {
       activities: beamActivities,
       ordinalPosition,
       verticalExtent: { min: minDate, max: maxDate },
-      burrConnection: { x: 0, y: 0 }, // Will be calculated during rendering
+      burrConnection: { x: 0, y: 0 },
+      type: "bound",
+      linkedOpportunityId: oppId,
     });
   }
 

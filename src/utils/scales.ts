@@ -5,7 +5,7 @@ export interface ChartScales {
   activitiesTimeScale: d3.ScaleTime<number, number, never>;
   opportunitiesTimeScale: d3.ScaleTime<number, number, never>;
   revenueScale: d3.ScaleLinear<number, number, never>;
-  beamXScale: d3.ScaleLinear<number, number, never>;
+  beamXScale: (ordinal: number) => number;
 }
 
 export interface LayoutDimensions {
@@ -219,7 +219,7 @@ export function createScales(
       .range(opportunitiesRange);
   }
 
-  // Beam X scale (will be created based on beams data)
+  // Beam X scale placeholder (will be created in render functions)
   const beamXScale = d3
     .scaleLinear()
     .domain([-0.5, 0.5])
@@ -235,21 +235,43 @@ export function createScales(
 
 /**
  * Creates beam X scale based on beam ordinal positions.
+ * Handles split domain:
+ * - Ordinal 0 (Opportunity-Free): Centered in the face.
+ * - Positive Ordinals (Right Bound): Mapped to right of face.
+ * - Negative Ordinals (Left Bound): Mapped to left of face.
  */
 export function createBeamXScale(
   ordinalPositions: number[],
-  width: number,
-  margin: { left: number; right: number },
-): d3.ScaleLinear<number, number, never> {
+  layout: LayoutDimensions,
+): (ordinal: number) => number {
+  const { width, margin, faceLeft, faceWidth } = layout;
+  const faceRight = faceLeft + faceWidth;
+
   const maxOrdinal =
     ordinalPositions.length > 0
       ? Math.max(...ordinalPositions.map(Math.abs))
       : 0;
 
-  return d3
+  // Create two linear scales for the left and right sides
+  const leftScale = d3
     .scaleLinear()
-    .domain([-maxOrdinal - 0.5, maxOrdinal + 0.5])
-    .range([margin.left, width - margin.right]);
+    .domain([-maxOrdinal - 0.5, -0.5])
+    .range([margin.left, faceLeft]);
+
+  const rightScale = d3
+    .scaleLinear()
+    .domain([0.5, maxOrdinal + 0.5])
+    .range([faceRight, width - margin.right]);
+
+  return (ordinal: number) => {
+    if (ordinal === 0) {
+      return faceLeft + faceWidth / 2;
+    }
+    if (ordinal > 0) {
+      return rightScale(ordinal);
+    }
+    return leftScale(ordinal);
+  };
 }
 
 // Re-export getMaxRevenue for convenience

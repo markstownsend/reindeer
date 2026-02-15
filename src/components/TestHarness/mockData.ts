@@ -612,4 +612,23 @@ export const datasets = {
   "Multi-Scale: Activities Only": multiScaleActivitiesOnly,
   "Multi-Scale: Opportunities Only": multiScaleOpportunitiesOnly,
   "Multi-Scale: Both Sections": multiScaleBothSections,
+  "Mixed: Bound and Free Activities": [
+    ...multiScaleBothSections,
+    {
+      id: "mixed-free-1",
+      timestamp: "2023-01-20T10:00:00Z",
+      sellers: [{ name: "Alice Smith", role: "Account Executive" }],
+      customers: [{ name: "Charlie Brown", role: "CTO" }],
+      description: "Unlinked Activity 1",
+      linkedOpportunities: [],
+    },
+    {
+      id: "mixed-free-2",
+      timestamp: "2023-03-05T14:00:00Z",
+      sellers: [{ name: "Bob Jones", role: "Sales Engineer" }],
+      customers: [{ name: "Diana Prince", role: "VP Engineering" }],
+      description: "Unlinked Activity 2",
+      linkedOpportunities: [],
+    },
+  ],
 };
