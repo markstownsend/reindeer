@@ -16,8 +16,12 @@ export interface LayoutDimensions {
   faceLeft: number;
   activitiesHeight: number;
   opportunitiesHeight: number;
+  opportunitiesPlotHeight: number;
+  teethHeight: number;
   activitiesRange: [number, number];
   opportunitiesRange: [number, number];
+  opportunitiesPlotRange: [number, number];
+  teethRange: [number, number];
   rowHeight: number;
   barHeight: number;
 }
@@ -47,6 +51,15 @@ export function calculateLayout(
     totalAvailableHeight * validatedActivitiesHeightRatio;
   const opportunitiesHeight =
     totalAvailableHeight * (1 - validatedActivitiesHeightRatio);
+  const idealTeethHeight = Math.max(80, opportunitiesHeight * 0.3);
+  const teethHeight = Math.min(
+    idealTeethHeight,
+    Math.max(40, opportunitiesHeight - 40),
+  );
+  const opportunitiesPlotHeight = Math.max(
+    40,
+    opportunitiesHeight - teethHeight,
+  );
 
   const activitiesRange: [number, number] = [
     margin.top,
@@ -55,6 +68,14 @@ export function calculateLayout(
   const opportunitiesRange: [number, number] = [
     margin.top + activitiesHeight,
     height - margin.bottom,
+  ];
+  const opportunitiesPlotRange: [number, number] = [
+    opportunitiesRange[0],
+    opportunitiesRange[0] + opportunitiesPlotHeight,
+  ];
+  const teethRange: [number, number] = [
+    opportunitiesPlotRange[1],
+    opportunitiesRange[1],
   ];
 
   const rowHeight = 40;
@@ -68,8 +89,12 @@ export function calculateLayout(
     faceLeft,
     activitiesHeight,
     opportunitiesHeight,
+    opportunitiesPlotHeight,
+    teethHeight,
     activitiesRange,
     opportunitiesRange,
+    opportunitiesPlotRange,
+    teethRange,
     rowHeight,
     barHeight,
   };
@@ -86,7 +111,7 @@ export function updateLayoutWithBuckets(
 
   const rowHeight =
     totalBuckets > 0
-      ? Math.min(40, layout.opportunitiesHeight / totalBuckets)
+      ? Math.min(40, layout.opportunitiesPlotHeight / totalBuckets)
       : 40;
 
   return {
@@ -104,7 +129,7 @@ export function createScales(
   buckets: FaceBucket[],
   layout: LayoutDimensions,
 ): ChartScales {
-  const { activitiesRange, opportunitiesRange, faceWidth, width, margin } =
+  const { activitiesRange, opportunitiesPlotRange, faceWidth, width, margin } =
     layout;
   const maxRevenue = getMaxRevenue(buckets);
 
@@ -173,7 +198,7 @@ export function createScales(
     const tempScale = d3
       .scaleTime()
       .domain([domainMin, domainMax])
-      .range(opportunitiesRange);
+      .range(opportunitiesPlotRange);
 
     // Find earliest bucket date from buckets
     let earliestBucketDate: Date | null = null;
@@ -199,11 +224,12 @@ export function createScales(
     let adjustedDomainMin = domainMin;
     if (earliestBucketDate) {
       const earliestBucketY = tempScale(earliestBucketDate);
-      if (earliestBucketY < opportunitiesRange[0]) {
+      if (earliestBucketY < opportunitiesPlotRange[0]) {
         const timeSpanMs = domainMax.getTime() - domainMin.getTime();
-        const pixelSpan = opportunitiesRange[1] - opportunitiesRange[0];
+        const pixelSpan = opportunitiesPlotRange[1] - opportunitiesPlotRange[0];
         const shiftMs =
-          ((opportunitiesRange[0] - earliestBucketY) / pixelSpan) * timeSpanMs;
+          ((opportunitiesPlotRange[0] - earliestBucketY) / pixelSpan) *
+          timeSpanMs;
         adjustedDomainMin = new Date(domainMin.getTime() - shiftMs);
       }
     }
@@ -211,12 +237,12 @@ export function createScales(
     opportunitiesTimeScale = d3
       .scaleTime()
       .domain([adjustedDomainMin, domainMax])
-      .range(opportunitiesRange);
+      .range(opportunitiesPlotRange);
   } else {
     opportunitiesTimeScale = d3
       .scaleTime()
       .domain([new Date(0), new Date(1)])
-      .range(opportunitiesRange);
+      .range(opportunitiesPlotRange);
   }
 
   // Beam X scale placeholder (will be created in render functions)

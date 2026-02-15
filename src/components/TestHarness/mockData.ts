@@ -598,6 +598,113 @@ export const multiScaleBothSections: Activity[] = [
   },
 ];
 
+// Teeth-specific test scenario for stage aggregation and independent upper/lower scales
+export const teethStageDistribution: Activity[] = [
+  {
+    id: "teeth-1",
+    timestamp: "2023-01-05T10:00:00Z",
+    sellers: [{ name: "Alice Smith", role: "Account Executive" }],
+    customers: [{ name: "Charlie Brown", role: "CTO" }],
+    description: "Opp A discovery",
+    linkedOpportunities: [
+      {
+        id: "opp-teeth-a",
+        closeDate: "2023-06-30",
+        stage: "Discovery",
+        revenue: 100000,
+        stageAdjustedRevenue: 20000,
+      },
+    ],
+  },
+  {
+    id: "teeth-2",
+    timestamp: "2023-02-10T10:00:00Z",
+    sellers: [{ name: "Alice Smith", role: "Account Executive" }],
+    customers: [{ name: "Diana Prince", role: "VP Engineering" }],
+    description: "Opp A moves to proposal",
+    linkedOpportunities: [
+      {
+        id: "opp-teeth-a",
+        closeDate: "2023-06-30",
+        stage: "Proposal",
+        revenue: 100000,
+        stageAdjustedRevenue: 50000,
+      },
+    ],
+  },
+  {
+    id: "teeth-3",
+    timestamp: "2023-02-18T12:00:00Z",
+    sellers: [{ name: "Bob Jones", role: "Sales Engineer" }],
+    customers: [{ name: "Eve Green", role: "CFO" }],
+    description: "Opp B proposal",
+    linkedOpportunities: [
+      {
+        id: "opp-teeth-b",
+        closeDate: "2023-07-15",
+        stage: "Proposal",
+        revenue: 250000,
+        stageAdjustedRevenue: 125000,
+      },
+    ],
+  },
+  {
+    id: "teeth-4",
+    timestamp: "2023-03-02T09:30:00Z",
+    sellers: [{ name: "Carol White", role: "Account Executive" }],
+    customers: [{ name: "Frank Black", role: "CTO" }],
+    description: "Opp C qualified",
+    linkedOpportunities: [
+      {
+        id: "opp-teeth-c",
+        closeDate: "2023-08-20",
+        stage: "Qualified",
+        revenue: 60000,
+        stageAdjustedRevenue: 30000,
+      },
+    ],
+  },
+  {
+    id: "teeth-5",
+    timestamp: "2023-03-10T11:00:00Z",
+    sellers: [{ name: "Carol White", role: "Account Executive" }],
+    customers: [{ name: "Grace Lee", role: "VP Engineering" }],
+    description: "Opp D closed won",
+    linkedOpportunities: [
+      {
+        id: "opp-teeth-d",
+        closeDate: "2023-05-30",
+        stage: "Closed Won",
+        revenue: 400000,
+        stageAdjustedRevenue: 400000,
+      },
+    ],
+  },
+  {
+    id: "teeth-6",
+    timestamp: "2023-03-20T15:00:00Z",
+    sellers: [{ name: "Bob Jones", role: "Sales Engineer" }],
+    customers: [{ name: "Henry Wilson", role: "CEO" }],
+    description: "Multi-linked activity to skew activity counts",
+    linkedOpportunities: [
+      {
+        id: "opp-teeth-b",
+        closeDate: "2023-07-15",
+        stage: "Proposal",
+        revenue: 250000,
+        stageAdjustedRevenue: 125000,
+      },
+      {
+        id: "opp-teeth-c",
+        closeDate: "2023-08-20",
+        stage: "Qualified",
+        revenue: 60000,
+        stageAdjustedRevenue: 30000,
+      },
+    ],
+  },
+];
+
 export const datasets = {
   "Small (1 Activity)": smallDataset,
   "Typical (3 Activities, 2 Opps)": typicalDataset,
@@ -612,6 +719,7 @@ export const datasets = {
   "Multi-Scale: Activities Only": multiScaleActivitiesOnly,
   "Multi-Scale: Opportunities Only": multiScaleOpportunitiesOnly,
   "Multi-Scale: Both Sections": multiScaleBothSections,
+  "Teeth: Stage Distribution": teethStageDistribution,
   "Mixed: Bound and Free Activities": [
     ...multiScaleBothSections,
     {

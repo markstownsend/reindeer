@@ -29,7 +29,7 @@ export function renderFace(
     faceWidth,
     faceLeft,
     activitiesHeight,
-    opportunitiesHeight,
+    opportunitiesPlotHeight,
     barHeight,
     margin,
   } = layout;
@@ -44,7 +44,7 @@ export function renderFace(
     faceLayer
       .append("text")
       .attr("x", width / 2)
-      .attr("y", margin.top + activitiesHeight + opportunitiesHeight / 2)
+      .attr("y", margin.top + activitiesHeight + opportunitiesPlotHeight / 2)
       .attr("text-anchor", "middle")
       .attr("class", "fill-gray-500 text-sm")
       .text("No opportunities to display");
@@ -68,7 +68,7 @@ export function renderFace(
   // Add specific top padding for the first item
   const topItemPadding = 20;
   const faceBoundaryTop = margin.top + activitiesHeight + facePadding;
-  const faceBoundaryHeight = opportunitiesHeight - facePadding * 2;
+  const faceBoundaryHeight = opportunitiesPlotHeight - facePadding * 2;
 
   // Face boundary rectangle (surrounds all opportunities)
   faceLayer

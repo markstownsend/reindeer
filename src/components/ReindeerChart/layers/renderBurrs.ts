@@ -19,8 +19,7 @@ export function renderBurrs(
   burrsLayer: d3.Selection<SVGGElement, unknown, null, undefined>,
   options: RenderBurrsOptions,
 ): void {
-  const { beams, layout, scales, opportunityPositions } = options;
-  const { margin } = layout;
+  const { beams, layout, opportunityPositions } = options;
 
   if (beams.length === 0) {
     return;
