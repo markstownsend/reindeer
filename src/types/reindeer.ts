@@ -85,6 +85,24 @@ export interface StackedOpportunity {
   opacity: number; // Visual state for emphasis/de-emphasis
 }
 
+/**
+ * Aggregated metrics for a single opportunity stage used by the teeth layer.
+ */
+export interface StageBucket {
+  stage: string;
+  opportunityRevenueTotal: number;
+  activityCountTotal: number;
+}
+
+/**
+ * Aggregated stage data for the teeth histogram section.
+ */
+export interface StageAggregationResult {
+  buckets: StageBucket[];
+  allStagesRevenueTotal: number;
+  allStagesActivityCountTotal: number;
+}
+
 // Configuration Interfaces
 
 /**

@@ -3,12 +3,18 @@ import * as d3 from "d3";
 import type { Activity } from "../../types/reindeer";
 import { aggregateFaceData } from "../../utils/faceAggregation";
 import { calculateBeamPositions } from "../../utils/beamAggregation";
+import { aggregateStageData } from "../../utils/stageAggregation";
 import {
   calculateLayout,
   updateLayoutWithBuckets,
   createScales,
 } from "../../utils/scales";
-import { renderFace, renderBeamsAndAntlers, renderBurrs } from "./layers";
+import {
+  renderFace,
+  renderBeamsAndAntlers,
+  renderBurrs,
+  renderTeeth,
+} from "./layers";
 
 interface ReindeerChartProps {
   width?: number;
@@ -35,6 +41,7 @@ export const ReindeerChart: React.FC<ReindeerChartProps> = ({
 
     // Create layers
     const faceLayer = svg.append("g").attr("id", "layer-face");
+    const teethLayer = svg.append("g").attr("id", "layer-teeth");
     const beamsLayer = svg.append("g").attr("id", "layer-beams");
     const antlersLayer = svg.append("g").attr("id", "layer-antlers");
     const burrsLayer = svg.append("g").attr("id", "layer-burrs");
@@ -42,6 +49,7 @@ export const ReindeerChart: React.FC<ReindeerChartProps> = ({
     // Calculate data
     // Use aggregateFaceData with initial defaults; layout properties will be updated later
     const { buckets, stacked } = aggregateFaceData(data);
+    const stageData = aggregateStageData(data);
     const beams = calculateBeamPositions(data);
 
     // Calculate layout
@@ -76,6 +84,12 @@ export const ReindeerChart: React.FC<ReindeerChartProps> = ({
       scales,
       width,
       height,
+    });
+
+    // Render teeth layer beneath opportunities
+    renderTeeth(teethLayer, {
+      stageData,
+      layout,
     });
 
     // Render center divider line

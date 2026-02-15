@@ -26,7 +26,6 @@ export function renderBeamsAndAntlers(
   options: RenderBeamsAndAntlersOptions,
 ): void {
   const { beams, layout, scales, opportunityPositions } = options;
-  const { margin } = layout;
   const { activitiesTimeScale } = scales;
 
   if (beams.length === 0) {
