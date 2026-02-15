@@ -65,6 +65,8 @@ export function renderFace(
 
   // Calculate face boundary with padding
   const facePadding = 30;
+  // Add specific top padding for the first item
+  const topItemPadding = 20;
   const faceBoundaryTop = margin.top + activitiesHeight + facePadding;
   const faceBoundaryHeight = opportunitiesHeight - facePadding * 2;
 
@@ -80,11 +82,23 @@ export function renderFace(
     .attr("rx", 8);
 
   // Create a scale that maps to the padded face boundary
+  // Add topItemPadding to the start of the range
   const originalDomain = opportunitiesTimeScale.domain();
   const paddedTimeScale = d3
     .scaleTime()
     .domain(originalDomain)
-    .range([faceBoundaryTop, faceBoundaryTop + faceBoundaryHeight - barHeight]);
+    .range([
+      faceBoundaryTop + topItemPadding,
+      faceBoundaryTop + faceBoundaryHeight - barHeight,
+    ]);
+
+  // Layout constants for labels
+  const dateLabelWidth = 50;
+  const revenueLabelWidth = 50;
+  const internalPadding = 8;
+  const barAreaLeft = faceLeft + dateLabelWidth + internalPadding;
+  const barAreaWidth =
+    faceWidth - dateLabelWidth - revenueLabelWidth - internalPadding * 2;
 
   // Render buckets
   for (const bucket of buckets) {
@@ -105,22 +119,24 @@ export function renderFace(
     // Use padded scale to fit buckets inside the face boundary
     const bucketY = paddedTimeScale(bucketDate);
 
-    // Month label (inside the boundary rectangle)
+    // Month label (inside the boundary rectangle, aligned left)
     faceLayer
       .append("text")
-      .attr("x", faceLeft + facePadding)
+      .attr("x", faceLeft + internalPadding)
       .attr("y", bucketY + barHeight / 2)
       .attr("text-anchor", "start")
       .attr("dominant-baseline", "middle")
-      .attr("class", "fill-orange-300 text-xs font-medium")
+      .attr("fill", "#FB812C") // Orange to match the theme
+      .attr("font-size", "12px")
+      .attr("font-weight", "500")
       .text(monthLabel);
 
-    // Bucket background
+    // Bucket background (behind bars)
     faceLayer
       .append("rect")
-      .attr("x", faceLeft + facePadding)
+      .attr("x", barAreaLeft)
       .attr("y", bucketY)
-      .attr("width", faceWidth - facePadding * 2)
+      .attr("width", barAreaWidth)
       .attr("height", barHeight)
       .attr("class", "fill-gray-800")
       .attr("rx", 2);
@@ -134,7 +150,8 @@ export function renderFace(
       0,
     );
     const totalSpacing = (initialBarWidths.length - 1) * 2;
-    const availableWidth = faceWidth - facePadding * 2;
+    // Use barAreaWidth instead of previous availableWidth
+    const availableWidth = barAreaWidth;
     const totalInitialWidth = totalInitialBarWidth + totalSpacing;
 
     // Scaling factor if bars exceed face width
@@ -143,7 +160,7 @@ export function renderFace(
         ? (availableWidth - totalSpacing) / totalInitialBarWidth
         : 1;
 
-    let xOffset = faceLeft + facePadding;
+    let xOffset = barAreaLeft;
 
     for (let i = 0; i < bucket.opportunities.length; i++) {
       const opp = bucket.opportunities[i];
@@ -185,13 +202,13 @@ export function renderFace(
       xOffset += barWidth + spacing;
     }
 
-    // Total revenue label
+    // Total revenue label (inside the boundary rectangle, aligned right)
     const totalRevenueText = `$${(bucket.totalRevenue / 1000).toFixed(0)}k`;
     faceLayer
       .append("text")
-      .attr("x", faceLeft + faceWidth + 5)
+      .attr("x", faceLeft + faceWidth - internalPadding)
       .attr("y", bucketY + barHeight / 2)
-      .attr("text-anchor", "start")
+      .attr("text-anchor", "end") // Right aligned
       .attr("dominant-baseline", "middle")
       .attr("class", "fill-gray-400 text-xs")
       .text(totalRevenueText);

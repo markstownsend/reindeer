@@ -144,15 +144,4 @@ export function renderBeamsAndAntlers(
       });
     });
   });
-
-  // Add beam labels (opportunity IDs)
-  beamsLayer
-    .selectAll(".beam-label")
-    .data(beams)
-    .enter()
-    .append("text")
-    .attr("class", "beam-label fill-gray-400 text-xs text-center")
-    .attr("x", (d) => beamXScale(d.ordinalPosition))
-    .attr("y", height - 10)
-    .text((d) => d.activities[0]?.linkedOpportunities[0]?.id || "Unknown");
 }
