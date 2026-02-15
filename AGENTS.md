@@ -227,3 +227,7 @@ This project uses Tessl tiles to provide specialized documentation and capabilit
   - **Tailwind CSS**: `.tessl/tiles/tessl/npm-tailwindcss/docs/` (Theme system and configuration)
 
 **Instruction**: When implementing complex D3 logic or configuring Tailwind, verify patterns against these local documentation files to ensure compatibility with the installed versions.
+
+# Agent Rules <!-- tessl-managed -->
+
+@.tessl/RULES.md follow the [instructions](.tessl/RULES.md)
