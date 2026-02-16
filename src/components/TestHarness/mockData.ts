@@ -837,6 +837,103 @@ export const timelineSevenYearLongTail = buildLongRangeScenario({
   revenueBase: 50000,
 });
 
+// Custom scenario: 30 opportunities over 2 years with varying activity counts
+// Largest opportunities have more activities on their timeline
+export const thirtyOppsTwoYears: Activity[] = (() => {
+  const activities: Activity[] = [];
+  const startYear = 2023;
+  const sellerPool = [
+    { name: "Alice Smith", role: "Account Executive" },
+    { name: "Bob Jones", role: "Sales Engineer" },
+    { name: "Carol White", role: "Enterprise AE" },
+    { name: "Dan Wright", role: "Solutions Consultant" },
+    { name: "Eve Green", role: "Strategic AE" },
+  ];
+  const customerPool = [
+    { name: "TechCorp CEO", role: "CTO" },
+    { name: "DataSystems VP", role: "VP Engineering" },
+    { name: "CloudFirst CFO", role: "CFO" },
+    { name: "InnovateTech COO", role: "COO" },
+    { name: "FutureSoft Head", role: "Head of IT" },
+    { name: "GlobalTech Lead", role: "VP Operations" },
+  ];
+
+  // Top 10 largest opportunities (by revenue) get 3-4 activities each
+  // Next 10 get 2 activities each
+  // Last 10 get 1 activity each
+
+  for (let i = 0; i < 30; i++) {
+    // Determine activity count based on opportunity size
+    let activitiesPerOpp: number;
+    if (i < 10) {
+      // Top 10: 3-4 activities (largest opportunities)
+      activitiesPerOpp = 3 + (i % 2); // 3 or 4
+    } else if (i < 20) {
+      // Next 10: 2 activities
+      activitiesPerOpp = 2;
+    } else {
+      // Last 10: 1 activity
+      activitiesPerOpp = 1;
+    }
+
+    // Revenue scales with opportunity index (largest first)
+    const revenue = 200000 - i * 5000;
+    const stageIndex = i % 5;
+
+    // Spread opportunities across 2 years (2023-2024)
+    const monthOffset = Math.floor((i / 30) * 24); // 0-23 months
+    const baseMonth = monthOffset % 12;
+    const baseYear = startYear + Math.floor(monthOffset / 12);
+
+    // Close date for this opportunity
+    const closeDate = new Date(Date.UTC(baseYear, baseMonth, 15 + (i % 10)));
+
+    for (let a = 0; a < activitiesPerOpp; a++) {
+      // Activities spread before close date
+      const daysBeforeClose = 60 + a * 25 + (i % 7);
+      const timestamp = new Date(
+        closeDate.getTime() - daysBeforeClose * 86400000,
+      );
+
+      const activityStageIndex = Math.min(stageIndex, a);
+      const activityStage = STAGE_SEQUENCE[activityStageIndex];
+
+      activities.push({
+        id: `30opp-2yr-activity-${i + 1}-${a + 1}`,
+        timestamp: timestamp.toISOString(),
+        sellers:
+          a % 3 === 0
+            ? [
+                sellerPool[i % sellerPool.length],
+                sellerPool[(i + 1) % sellerPool.length],
+              ]
+            : [sellerPool[i % sellerPool.length]],
+        customers: [customerPool[(i + a) % customerPool.length]],
+        description: `${
+          a === 0
+            ? "Initial"
+            : a === activitiesPerOpp - 1
+              ? "Final"
+              : "Follow-up"
+        } touchpoint for deal rank #${i + 1}`,
+        linkedOpportunities: [
+          {
+            id: `30opp-2yr-opp-${i + 1}`,
+            closeDate: closeDate.toISOString().slice(0, 10),
+            stage: activityStage,
+            revenue: Math.round(revenue),
+            stageAdjustedRevenue: Math.round(
+              revenue * (activityStageIndex + 1) * 0.15,
+            ),
+          },
+        ],
+      });
+    }
+  }
+
+  return activities;
+})();
+
 export const datasets = {
   "Small (1 Activity)": smallDataset,
   "Typical (3 Activities, 2 Opps)": typicalDataset,
@@ -857,6 +954,7 @@ export const datasets = {
   "Timeline: 5-Year Dense (60 Activities, 30 Opps)": timelineFiveYearDense,
   "Timeline: 7-Year Long Tail (84 Activities, 28 Opps)":
     timelineSevenYearLongTail,
+  "Timeline: 30 Opps / 2 Years (Mixed Activities)": thirtyOppsTwoYears,
   "Mixed: Bound and Free Activities": [
     ...multiScaleBothSections,
     {
