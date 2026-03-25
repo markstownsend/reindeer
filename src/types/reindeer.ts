@@ -3,32 +3,39 @@
 export interface Seller {
   name: string;
   role: string;
+  country?: string; // ISO 3166-1 alpha-2 code (e.g., "US", "GB", "DE")
 }
 
 export interface Customer {
   name: string;
   role: string;
+  country?: string; // ISO 3166-1 alpha-2 code (e.g., "US", "GB", "DE")
 }
 
 export interface Opportunity {
   id: string;
+  name?: string; // Human-readable opportunity name
   closeDate: string; // ISO 8601 date YYYY-MM-DD
   stage: string;
   revenue: number;
   stageAdjustedRevenue: number;
 }
 
+export interface Partner {
+  name: string;
+  role: string;
+  country?: string; // ISO 3166-1 alpha-2 code (e.g., "US", "GB", "DE")
+}
+
 export interface Activity {
   id: string;
   timestamp: string; // ISO 8601 UTC format
+  type?: string; // Activity type: "meeting", "call", "email", "demo", "workshop" (defaults to "meeting")
   sellers: Seller[];
   customers: Customer[];
+  partners?: Partner[];
   description: string;
   linkedOpportunities: Opportunity[];
-}
-
-export interface ReindeerData {
-  activities: Activity[];
 }
 
 // Internal Visualization Model Interfaces
@@ -45,16 +52,6 @@ export interface Beam {
   burrConnection: { x: number; y: number };
   type: "bound" | "free";
   linkedOpportunityId?: string;
-}
-
-/**
- * Represents a complete antler structure combining a beam (vertical timeline)
- * with its burr (horizontal connector) and the associated opportunity.
- */
-export interface Antler {
-  beam: Beam;
-  burr: { startX: number; endX: number; y: number };
-  connectedOpportunity: Opportunity;
 }
 
 /**
@@ -86,7 +83,7 @@ export interface StackedOpportunity {
 }
 
 /**
- * Aggregated metrics for a single opportunity stage used by the teeth layer.
+ * Aggregated metrics for a single opportunity stage used by the nose layer.
  */
 export interface StageBucket {
   stage: string;
@@ -95,22 +92,10 @@ export interface StageBucket {
 }
 
 /**
- * Aggregated stage data for the teeth histogram section.
+ * Aggregated stage data for the nose donut section.
  */
 export interface StageAggregationResult {
   buckets: StageBucket[];
   allStagesRevenueTotal: number;
   allStagesActivityCountTotal: number;
-}
-
-// Configuration Interfaces
-
-/**
- * Configuration for mapping stage and role values to Tailwind CSS classes.
- * Supports visual differentiation of opportunities by stage and
- * activities by participant role.
- */
-export interface ReindeerConfig {
-  stageStyleMap: Record<string, string>; // e.g., { "Discovery": "fill-blue-500", "Proposal": "fill-green-500" }
-  roleStyleMap: Record<string, string>; // e.g., { "economic buyer": "fill-red-500", "technical buyer": "fill-yellow-500" }
 }

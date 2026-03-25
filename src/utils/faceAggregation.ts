@@ -9,27 +9,29 @@ import type {
  * Extracts unique opportunities from a list of activities.
  * Deduplicates based on the opportunity ID.
  */
-export function extractUniqueOpportunities(
+function extractUniqueOpportunities(
   activities: Activity[],
 ): Opportunity[] {
-  const opportunityMap = new Map<string, Opportunity>();
+  const opportunityMap = new Map<string, { opp: Opportunity; ts: number }>();
 
   for (const activity of activities) {
+    const ts = new Date(activity.timestamp).getTime();
     for (const opportunity of activity.linkedOpportunities) {
-      if (!opportunityMap.has(opportunity.id)) {
-        opportunityMap.set(opportunity.id, opportunity);
+      const existing = opportunityMap.get(opportunity.id);
+      if (!existing || ts > existing.ts) {
+        opportunityMap.set(opportunity.id, { opp: opportunity, ts });
       }
     }
   }
 
-  return Array.from(opportunityMap.values());
+  return Array.from(opportunityMap.values()).map((e) => e.opp);
 }
 
 /**
  * Groups opportunities by a specified time period (month or quarter).
  * Returns a Map where the key is the period identifier (e.g., "2023-12" or "2023-Q4").
  */
-export function groupOpportunitiesByPeriod(
+function groupOpportunitiesByPeriod(
   opportunities: Opportunity[],
   period: "month" | "quarter",
 ): Map<string, Opportunity[]> {
@@ -63,7 +65,7 @@ export function groupOpportunitiesByPeriod(
  * Calculates FaceBucket structures from grouped opportunity data.
  * Sorts buckets chronologically and assigns layout properties.
  */
-export function calculateFaceBuckets(
+function calculateFaceBuckets(
   groupedData: Map<string, Opportunity[]>,
   layout: { rowHeight: number; maxWidth: number },
 ): FaceBucket[] {
@@ -99,7 +101,7 @@ export function calculateFaceBuckets(
  * Calculates StackedOpportunity structures for all buckets.
  * Computes width and xPosition for each opportunity within its bucket.
  */
-export function calculateStackedOpportunities(
+function calculateStackedOpportunities(
   buckets: FaceBucket[],
 ): StackedOpportunity[] {
   const stacked: StackedOpportunity[] = [];

@@ -11,9 +11,9 @@ This file provides the definitive guidance to agents when working with code in t
 
 ## Testing & Visual TDD Strategy
 
-Since there is no automated test runner, references to "TDD" or "running tests" in generic SOPs (like `implement/CODEASSIST.md`) must be interpreted as **Visual TDD**:
+Since there is no automated test runner, all testing follows **Visual TDD**:
 
-1.  **Red**: Create or identify a scenario in `src/components/TestHarness/mockData.ts` and `TestHarness.tsx` that demonstrates the missing feature or bug. Verify it fails to render correctly in the browser.
+1.  **Red**: Create or identify a scenario in `src/components/ReindeerExplorer/mockData.ts` and `ReindeerExplorer.tsx` that demonstrates the missing feature or bug. Verify it fails to render correctly in the browser.
 2.  **Green**: Implement logic in `ReindeerChart` until the specific scenario renders correctly.
 3.  **Refactor**: Clean up code while ensuring the visual output remains stable.
 
@@ -24,9 +24,10 @@ Since there is no automated test runner, references to "TDD" or "running tests" 
 The visualization follows a specific layering order defined in `design/reindeer-root.md`:
 
 1.  **Face** (Background/Base)
-2.  **Antlers**
+2.  **Nose**
 3.  **Beams**
-4.  **Burr**
+4.  **Antlers**
+5.  **Burr**
 
 ### Multiple Vertical Scales System
 
@@ -88,7 +89,22 @@ The core architectural challenge is mapping the `activity_example.json` schema t
    - `groupActivitiesByOpportunity()` - Groups activities by opportunity ID
    - `calculateBeamPositions()` - Implements beam displacement algorithm with alternating ordinal positions
 
-3. **`src/utils/dataTransform.ts`** - Shared transformation utilities:
+3. **`src/utils/stageAggregation.ts`** — Pure logic for nose layer data:
+   - `aggregateStageData()` — Deduplicates opportunities by ID using latest activity timestamp, aggregates revenue and activity counts by stage
+
+4. **`src/utils/scales.ts`** — Layout calculation and D3 scale creation:
+   - `calculateLayout()` — Computes layout dimensions from chart configuration
+   - `updateLayoutWithBuckets()` — Adjusts row heights based on bucket count
+   - `createScales()` — Creates time and revenue D3 scales
+   - `createBeamXScale()` — Creates beam horizontal positioning scale
+
+5. **`src/utils/safeRender.ts`** — Error handling wrapper for D3 layer rendering
+
+6. **`src/utils/activityShape.ts`** — Maps activity types to SVG path shapes
+
+7. **`src/utils/countryFlag.ts`** — Converts ISO country codes to flag emoji
+
+8. **`src/utils/dataTransform.ts`** - Shared transformation utilities:
    - `groupOpportunitiesByMonth()` - Creates YearGroup structures for rendering
    - `getMaxRevenue()` - Calculates maximum revenue for scale normalization
    - `getMonthName()` - Utility for month label display
@@ -131,12 +147,11 @@ The project follows the **"React wrapper, D3 engine"** pattern.
 ## Design & Implementation Guidelines
 
 - **Design Specs**: Consult `design/reindeer-grammar.md` for specific rules on how activities are mapped to the visualization (e.g., beam displacement, antlers).
-- **Implementation Guide**: Refer to `implement/CODEASSIST.md` for the structured workflow, but adapt its "Test" steps to the **Visual TDD** strategy described above.
+- **Implementation Guide**: Follow the **Visual TDD** strategy described above in the Testing & Visual TDD Strategy section.
 - **Project Structure**:
   - `design/`: Visual and architectural specifications.
-  - `implement/`: SOPs (e.g., `CODEASSIST.md`).
   - `src/components/ReindeerChart/`: Core visualization logic.
-  - `src/components/TestHarness/`: Visual verification tool.
+  - `src/components/ReindeerExplorer/`: Interactive exploration and visual verification tool.
 
 ## Coding Standards
 
@@ -160,12 +175,14 @@ The `ReindeerChart` component accepts the following configuration props:
 | `data`                  | Activity[] | []      | Array of activities to visualize                                                                           |
 | `faceWidthRatio`        | number     | 0.6     | Proportion of available width for face (0.1 to 1.0). Face is centered, antlers extend beyond.              |
 | `activitiesHeightRatio` | number     | 0.5     | Proportion of available height for activities section (0.1 to 0.9). Activities render above opportunities. |
+| `focusedPeople`         | Set\<string\> | undefined | Set of participant names to highlight. When set, matching beams render at full opacity, others dim.     |
+| `focusMode`             | "or" \| "and" | "or"  | Focus matching mode. "or": highlight beams with any focused person. "and": only beams with all focused people. |
 
 **Validation**: Both `faceWidthRatio` and `activitiesHeightRatio` are automatically clamped to valid ranges.
 
 ## Visualization Layers
 
-The chart renders four distinct layers in order:
+The chart renders five distinct layers in order:
 
 1. **`layer-face`** (`<g id="layer-face">`)
 
@@ -176,17 +193,22 @@ The chart renders four distinct layers in order:
    - Revenue labels
    - Legend
 
-2. **`layer-beams`** (`<g id="layer-beams">`)
+2. **`layer-nose`** (`<g id="layer-nose">`)
+
+   - Pipeline summary bars showing revenue by stage
+   - Full pipeline bar and focused pipeline bar (when people focus is active)
+
+3. **`layer-beams`** (`<g id="layer-beams">`)
 
    - Vertical beam edges (lines connecting activity nodes)
    - Beam labels at bottom
 
-3. **`layer-antlers`** (`<g id="layer-antlers">`)
+4. **`layer-antlers`** (`<g id="layer-antlers">`)
 
    - Activity nodes (circles, sized by participant count)
    - Northern Terminus icons (seller/customer participants)
 
-4. **`layer-burrs`** (`<g id="layer-burrs">`)
+5. **`layer-burrs`** (`<g id="layer-burrs">`)
    - Horizontal dashed lines connecting beam bottom to opportunity center
 
 ## Data Flow
@@ -196,38 +218,29 @@ graph TD
     A[Raw Activities] --> B[faceAggregation.ts]
     A --> C[beamAggregation.ts]
     A --> D[dataTransform.ts]
+    A --> E[stageAggregation.ts]
 
-    B --> E[Face Buckets]
-    C --> F[Beams]
-    D --> G[Year Groups]
+    B --> F[Face Buckets]
+    C --> G[Beams]
+    D --> H[Year Groups]
+    E --> I[Stage Data]
 
-    E --> H[ReindeerChart]
-    F --> H
-    G --> H
+    F --> J[ReindeerChart]
+    G --> J
+    H --> J
+    I --> J
 
-    H --> I[SVG Rendering]
-    I --> J[layer-face]
-    I --> K[layer-beams]
-    I --> L[layer-antlers]
-    I --> M[layer-burrs]
+    J --> K[SVG Rendering]
+    K --> L[layer-face]
+    K --> M[layer-nose]
+    K --> N[layer-beams]
+    K --> O[layer-antlers]
+    K --> P[layer-burrs]
 ```
 
 ## Debugging
 
-- **Mock Data**: Use `src/components/TestHarness/mockData.ts` to tweak or add data scenarios for debugging.
+- **Mock Data**: Use `src/components/ReindeerExplorer/mockData.ts` to tweak or add data scenarios for debugging.
 - **D3 Selections**: When inspecting SVG elements, remember that D3 selections are often cleared and redrawn completely on React state changes.
 
-## Tessl Capabilities & Documentation
 
-This project uses Tessl tiles to provide specialized documentation and capabilities.
-
-- **Active Rules**: `.tessl/RULES.md` (Check this for installed steering capabilities)
-- **Library Documentation**:
-  - **D3.js**: `.tessl/tiles/tessl/npm-d3/docs/` (Essential for Selection, Scales, Shapes, and Animations)
-  - **Tailwind CSS**: `.tessl/tiles/tessl/npm-tailwindcss/docs/` (Theme system and configuration)
-
-**Instruction**: When implementing complex D3 logic or configuring Tailwind, verify patterns against these local documentation files to ensure compatibility with the installed versions.
-
-# Agent Rules <!-- tessl-managed -->
-
-@.tessl/RULES.md follow the [instructions](.tessl/RULES.md)

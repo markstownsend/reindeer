@@ -13,7 +13,18 @@ export default {
     "fill-gray-500",
     "fill-gray-800",
     "fill-white",
-    // Stroke colors
+    "fill-violet-400",
+    "fill-teal-500",
+    // Stroke colors for stage-colored pill borders
+    "stroke-indigo-400",
+    "stroke-blue-400",
+    "stroke-purple-400",
+    "stroke-violet-400",
+    "stroke-green-400",
+    "stroke-red-400",
+    "stroke-emerald-500",
+    "stroke-teal-500",
+    "stroke-gray-400",
     "stroke-gray-700",
     // Text colors
     "text-xs",

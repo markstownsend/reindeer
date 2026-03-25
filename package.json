@@ -1,11 +1,33 @@
 {
   "name": "reindeer",
   "version": "1.0.0",
+  "description": "A reindeer-shaped visualization component for mapping sales activities and opportunities over time",
+  "license": "Unlicense",
+  "author": "Mark Townsend",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/markstownsend/reindeer.git"
+  },
+  "keywords": [
+    "visualization",
+    "d3",
+    "react",
+    "chart",
+    "timeline",
+    "sales",
+    "opportunities",
+    "svg"
+  ],
+  "homepage": "https://github.com/markstownsend/reindeer",
+  "bugs": {
+    "url": "https://github.com/markstownsend/reindeer/issues"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
+    "test": "vitest run",
     "lint": "eslint ."
   },
   "dependencies": {
@@ -13,7 +35,6 @@
     "@tailwindcss/vite": "^4.1.18",
     "clsx": "^2.1.1",
     "d3": "^7.9.0",
-    "npm": "^11.6.4",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwind-merge": "^3.4.0"
@@ -35,6 +56,7 @@
     "tailwindcss": "^4.1.17",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.51.0",
-    "vite": "^7.2.6"
+    "vite": "^7.2.6",
+    "vitest": "^4.1.0"
   }
 }

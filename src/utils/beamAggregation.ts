@@ -4,7 +4,7 @@ import type { Activity, Beam } from "../types/reindeer";
  * Groups activities by their linked opportunity ID.
  * Returns a Map where the key is the opportunity ID and the value is an array of activities.
  */
-export function groupActivitiesByOpportunity(
+function groupActivitiesByOpportunity(
   activities: Activity[],
 ): Map<string, Activity[]> {
   const activityMap = new Map<string, Activity[]>();
@@ -49,8 +49,8 @@ export function calculateBeamPositions(activities: Activity[]): Beam[] {
   // Step 2: Process Opportunity-Free Activities (Ordinal 0)
   if (freeActivities.length > 0) {
     const timestamps = freeActivities.map((a) => new Date(a.timestamp));
-    const minDate = new Date(Math.min(...timestamps.map((d) => d.getTime())));
-    const maxDate = new Date(Math.max(...timestamps.map((d) => d.getTime())));
+    const minDate = new Date(timestamps.reduce((min, d) => Math.min(min, d.getTime()), Infinity));
+    const maxDate = new Date(timestamps.reduce((max, d) => Math.max(max, d.getTime()), -Infinity));
 
     beams.push({
       activities: freeActivities,
@@ -101,8 +101,8 @@ export function calculateBeamPositions(activities: Activity[]): Beam[] {
 
     // Calculate vertical extent
     const timestamps = beamActivities.map((a) => new Date(a.timestamp));
-    const minDate = new Date(Math.min(...timestamps.map((d) => d.getTime())));
-    const maxDate = new Date(Math.max(...timestamps.map((d) => d.getTime())));
+    const minDate = new Date(timestamps.reduce((min, d) => Math.min(min, d.getTime()), Infinity));
+    const maxDate = new Date(timestamps.reduce((max, d) => Math.max(max, d.getTime()), -Infinity));
 
     beams.push({
       activities: beamActivities,

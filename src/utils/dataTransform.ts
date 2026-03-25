@@ -1,17 +1,4 @@
-export function parseCloseDate(closeDate: string): Date | null {
-  if (!closeDate || typeof closeDate !== "string") {
-    return null;
-  }
-
-  const date = new Date(closeDate);
-  if (isNaN(date.getTime())) {
-    return null;
-  }
-
-  return date;
-}
-
-export function getMonthName(month: number): string {
+function getMonthName(month: number): string {
   const monthNames = [
     "Jan",
     "Feb",

@@ -26,7 +26,7 @@
   "linkedOpportunities": [
     {
       "closeDate": "2026-12-15",
-      "stage": "Discovery",
+      "stage": "Prospect",
       "revenue": 50000,
       "stageAdjustedRevenue": 10000,
       "description": "pricing grid",
@@ -34,7 +34,7 @@
     },
     {
       "closeDate": "2026-01-30",
-      "stage": "Proposal",
+      "stage": "Technical Validation",
       "revenue": 75000,
       "stageAdjustedRevenue": 37500,
       "description": "graviton usage",
