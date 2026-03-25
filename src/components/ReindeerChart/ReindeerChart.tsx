@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from "react";
-import * as d3 from "d3";
+import React, { useEffect, useMemo, useRef } from "react";
+import { select } from "d3-selection";
 import type { Activity } from "../../types/reindeer";
 import { aggregateFaceData } from "../../utils/faceAggregation";
 import { calculateBeamPositions } from "../../utils/beamAggregation";
@@ -13,60 +13,109 @@ import {
   renderFace,
   renderBeamsAndAntlers,
   renderBurrs,
-  renderTeeth,
+  renderNose,
 } from "./layers";
+import { safeRender } from "../../utils/safeRender";
+
+const MAX_ACTIVITIES = 2000;
 
 interface ReindeerChartProps {
   width?: number;
   height?: number;
   data?: Activity[];
+  fullData?: Activity[];
   faceWidthRatio?: number;
   activitiesHeightRatio?: number;
+  focusedPeople?: Set<string>;
+  focusMode?: "or" | "and";
 }
 
 export const ReindeerChart: React.FC<ReindeerChartProps> = ({
   width = 800,
   height = 600,
   data = [],
+  fullData,
   faceWidthRatio = 0.6,
   activitiesHeightRatio = 0.5,
+  focusedPeople,
+  focusMode = "or",
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
+
+  // Use fullData for layout/positioning, data for rendering
+  const layoutData = useMemo(
+    () => {
+      const d = fullData || data;
+      return d.length > MAX_ACTIVITIES ? d.slice(0, MAX_ACTIVITIES) : d;
+    },
+    [fullData, data],
+  );
+  const safeData = useMemo(
+    () => data.length > MAX_ACTIVITIES ? data.slice(0, MAX_ACTIVITIES) : data,
+    [data],
+  );
+
+  // Layout computed from full dataset (stable positions)
+  const { buckets: layoutBuckets } = useMemo(() => aggregateFaceData(layoutData), [layoutData]);
+  const layoutBeams = useMemo(() => calculateBeamPositions(layoutData), [layoutData]);
+
+  // Render data computed from filtered dataset
+  const { buckets } = useMemo(() => aggregateFaceData(safeData), [safeData]);
+  const stageData = useMemo(() => aggregateStageData(safeData), [safeData]);
+  const beams = useMemo(() => calculateBeamPositions(safeData), [safeData]);
 
   useEffect(() => {
     if (!svgRef.current) return;
 
-    const svg = d3.select(svgRef.current);
-    svg.selectAll("*").remove();
+    const svg = select(svgRef.current);
+    svg.selectAll(":not(title):not(desc)").remove();
 
     // Create layers
     const faceLayer = svg.append("g").attr("id", "layer-face");
-    const teethLayer = svg.append("g").attr("id", "layer-teeth");
+    const noseLayer = svg.append("g").attr("id", "layer-nose");
     const beamsLayer = svg.append("g").attr("id", "layer-beams");
     const antlersLayer = svg.append("g").attr("id", "layer-antlers");
     const burrsLayer = svg.append("g").attr("id", "layer-burrs");
 
-    // Calculate data
-    // Use aggregateFaceData with initial defaults; layout properties will be updated later
-    const { buckets, stacked } = aggregateFaceData(data);
-    const stageData = aggregateStageData(data);
-    const beams = calculateBeamPositions(data);
-
-    // Calculate layout
+    // Calculate layout from full dataset (stable positions)
     let layout = calculateLayout(
       width,
       height,
       faceWidthRatio,
       activitiesHeightRatio,
     );
-    layout = updateLayoutWithBuckets(layout, buckets);
+    layout = updateLayoutWithBuckets(layout, layoutBuckets);
 
-    // Create scales
-    const scales = createScales(data, buckets, layout);
+    // Create scales from full dataset
+    const scales = createScales(layoutData, layoutBuckets, layout);
+
+    // Compute focused opportunity IDs for face/nose dimming
+    let focusedOppIds: Set<string> | undefined;
+    if (focusedPeople && focusedPeople.size > 0) {
+      focusedOppIds = new Set<string>();
+      for (const beam of layoutBeams) {
+        if (!beam.linkedOpportunityId) continue;
+        const matchFn = (a: typeof safeData[0]) => {
+          const names = [
+            ...a.sellers.map((s) => s.name),
+            ...a.customers.map((c) => c.name),
+            ...(a.partners || []).map((p) => p.name),
+          ];
+          return names.some((n) => focusedPeople.has(n));
+        };
+        const isFocused = focusMode === "and"
+          ? Array.from(focusedPeople).every((person) =>
+              beam.activities.some((a) =>
+                [...a.sellers.map((s) => s.name), ...a.customers.map((c) => c.name), ...(a.partners || []).map((p) => p.name)].includes(person),
+              ),
+            )
+          : beam.activities.some(matchFn);
+        if (isFocused) focusedOppIds.add(beam.linkedOpportunityId);
+      }
+    }
 
     // Check for empty activities
-    const activityTimestamps = data.map((a) => new Date(a.timestamp));
-    if (activityTimestamps.length === 0) {
+    if (safeData.length === 0) {
       faceLayer
         .append("text")
         .attr("x", width / 2)
@@ -76,21 +125,31 @@ export const ReindeerChart: React.FC<ReindeerChartProps> = ({
         .text("No activities to display");
     }
 
-    // Render face layer (returns opportunity positions for burr connections)
-    const opportunityPositions = renderFace(faceLayer, {
-      buckets,
-      stacked,
-      layout,
-      scales,
-      width,
-      height,
-    });
+    // Render face layer — use layout buckets for stable positions, filter to visible opps
+    let opportunityPositions = new Map<string, { x: number; y: number }>();
+    const filteredOppIdsForFace = new Set(
+      safeData.flatMap((a) => a.linkedOpportunities.map((o) => o.id)),
+    );
+    safeRender(faceLayer, () => {
+      opportunityPositions = renderFace(faceLayer, {
+        buckets: layoutBuckets,
+        layout,
+        scales,
+        width,
+        focusedOppIds,
+        filteredOppIds: filteredOppIdsForFace,
+      });
+    }, "face");
 
-    // Render teeth layer beneath opportunities
-    renderTeeth(teethLayer, {
-      stageData,
-      layout,
-    });
+    // Render nose (pipeline donut) beneath opportunities
+    safeRender(noseLayer, () => {
+      renderNose(noseLayer, {
+        stageData,
+        layout,
+        focusedOppIds,
+        faceBuckets: buckets,
+      });
+    }, "nose");
 
     // Render center divider line
     svg
@@ -99,27 +158,39 @@ export const ReindeerChart: React.FC<ReindeerChartProps> = ({
       .attr("y1", layout.margin.top)
       .attr("x2", width / 2)
       .attr("y2", height - layout.margin.bottom)
-      .attr("stroke", "#4B5563")
+      .attr("class", "stroke-gray-600")
       .attr("stroke-width", 2)
       .attr("stroke-dasharray", "5,5");
 
+    // Build render beams: use layout beam positions, keep entire beams whose opportunity is in filtered set
+    const filteredOppIdsSet = new Set(
+      safeData.flatMap((a) => a.linkedOpportunities.map((o) => o.id)),
+    );
+    const renderBeams = layoutBeams.filter((beam) =>
+      beam.type === "free" || (beam.linkedOpportunityId && filteredOppIdsSet.has(beam.linkedOpportunityId)),
+    );
+
     // Render beams and antlers
-    renderBeamsAndAntlers(beamsLayer, antlersLayer, {
-      beams,
-      layout,
-      scales,
-      height,
-      opportunityPositions,
-    });
+    safeRender(beamsLayer, () => {
+      renderBeamsAndAntlers(beamsLayer, antlersLayer, {
+        beams: renderBeams,
+        layout,
+        scales,
+        opportunityPositions,
+        focusedPeople,
+        focusMode,
+      });
+    }, "beams");
 
     // Render burrs
-    renderBurrs(burrsLayer, {
-      beams,
-      layout,
-      scales,
-      opportunityPositions,
-    });
-  }, [width, height, data, faceWidthRatio, activitiesHeightRatio]);
+    safeRender(burrsLayer, () => {
+      renderBurrs(burrsLayer, {
+        beams: renderBeams,
+        layout,
+        opportunityPositions,
+      });
+    }, "burrs");
+  }, [width, height, layoutData, layoutBuckets, layoutBeams, safeData, buckets, stageData, beams, faceWidthRatio, activitiesHeightRatio, focusedPeople, focusMode]);
 
   return (
     <div className="reindeer-root w-full h-full flex justify-center items-center bg-gray-800 p-4 rounded-lg">
@@ -128,7 +199,12 @@ export const ReindeerChart: React.FC<ReindeerChartProps> = ({
         width={width}
         height={height}
         className="bg-gray-900 rounded shadow-lg"
-      />
+        role="img"
+        aria-label={`Reindeer Chart: ${safeData.length} activities across ${new Set(safeData.flatMap(a => a.linkedOpportunities.map(o => o.id))).size} opportunities`}
+      >
+        <title>Reindeer Chart</title>
+        <desc>A timeline visualization showing sales activities and opportunities</desc>
+      </svg>
     </div>
   );
 };

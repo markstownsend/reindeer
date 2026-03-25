@@ -5,12 +5,14 @@ import type {
 } from "../types/reindeer";
 
 const KNOWN_STAGE_ORDER = [
-  "Discovery",
+  "Prospect",
   "Qualified",
-  "Proposal",
-  "Closing",
-  "Closed Won",
+  "Technical Validation",
+  "Business Validation",
+  "Committed",
   "Closed Lost",
+  "Launched",
+  "Completed",
 ];
 
 function normalizeStage(stage: string): string {
@@ -36,7 +38,7 @@ function sortStageBuckets(a: StageBucket, b: StageBucket): number {
 }
 
 /**
- * Aggregates stage-level data for the teeth layer.
+ * Aggregates stage-level data for the nose layer.
  *
  * Revenue semantics:
  * - Revenue is deduplicated per opportunity ID.

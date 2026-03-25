@@ -1,7 +1,7 @@
-import { TestHarness } from "./components/TestHarness/TestHarness";
+import { ReindeerExplorer } from "./components/ReindeerExplorer/ReindeerExplorer";
 
 function App() {
-  return <TestHarness />;
+  return <ReindeerExplorer />;
 }
 
 export default App;

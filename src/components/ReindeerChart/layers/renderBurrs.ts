@@ -1,11 +1,11 @@
 import type { Beam } from "../../../types/reindeer";
-import type { ChartScales, LayoutDimensions } from "../../../utils/scales";
+import type { LayoutDimensions } from "../../../utils/scales";
 import { createBeamXScale } from "../../../utils/scales";
+import type { Selection } from "d3-selection";
 
 export interface RenderBurrsOptions {
   beams: Beam[];
   layout: LayoutDimensions;
-  scales: ChartScales;
   opportunityPositions: Map<string, { x: number; y: number }>;
 }
 
@@ -16,7 +16,7 @@ export interface RenderBurrsOptions {
  * - Opportunity-free beams connect to the top edge of the face.
  */
 export function renderBurrs(
-  burrsLayer: d3.Selection<SVGGElement, unknown, null, undefined>,
+  burrsLayer: Selection<SVGGElement, unknown, null, undefined>,
   options: RenderBurrsOptions,
 ): void {
   const { beams, layout, opportunityPositions } = options;
@@ -43,8 +43,9 @@ export function renderBurrs(
           .append("line")
           .attr(
             "class",
-            "burr-line stroke-gray-500 stroke-1 stroke-dasharray-3,3",
+            "burr-line stroke-gray-500 stroke-1",
           )
+          .attr("stroke-dasharray", "3,3")
           .attr("x1", beamX)
           .attr("y1", oppPosition.y)
           .attr("x2", oppPosition.x)

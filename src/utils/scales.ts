@@ -1,10 +1,22 @@
-import * as d3 from "d3";
+import { scaleTime, scaleLinear } from "d3-scale";
+import type { ScaleTime, ScaleLinear } from "d3-scale";
 import type { Activity, FaceBucket } from "../types/reindeer";
 
+/** Layout constants */
+const MARGIN = { top: 60, right: 40, bottom: 40, left: 80 } as const;
+const DEFAULT_ROW_HEIGHT = 40;
+const BAR_HEIGHT_RATIO = 0.7;
+const MIN_NOSE_HEIGHT = 40;
+const NOSE_HEIGHT_RATIO = 0.25;
+const MIN_PLOT_HEIGHT = 40;
+const TIME_PADDING_RATIO = 0.05;
+const DEFAULT_TIME_PADDING_MS = 86400000; // 1 day in milliseconds
+const REVENUE_SCALE_WIDTH_RATIO = 0.8;
+
 export interface ChartScales {
-  activitiesTimeScale: d3.ScaleTime<number, number, never>;
-  opportunitiesTimeScale: d3.ScaleTime<number, number, never>;
-  revenueScale: d3.ScaleLinear<number, number, never>;
+  activitiesTimeScale: ScaleTime<number, number, never>;
+  opportunitiesTimeScale: ScaleTime<number, number, never>;
+  revenueScale: ScaleLinear<number, number, never>;
   beamXScale: (ordinal: number) => number;
 }
 
@@ -17,11 +29,11 @@ export interface LayoutDimensions {
   activitiesHeight: number;
   opportunitiesHeight: number;
   opportunitiesPlotHeight: number;
-  teethHeight: number;
+  noseHeight: number;
   activitiesRange: [number, number];
   opportunitiesRange: [number, number];
   opportunitiesPlotRange: [number, number];
-  teethRange: [number, number];
+  noseRange: [number, number];
   rowHeight: number;
   barHeight: number;
 }
@@ -35,7 +47,7 @@ export function calculateLayout(
   faceWidthRatio: number,
   activitiesHeightRatio: number,
 ): LayoutDimensions {
-  const margin = { top: 60, right: 40, bottom: 40, left: 80 };
+  const margin = { ...MARGIN };
   const validatedFaceWidthRatio = Math.max(0.1, Math.min(1.0, faceWidthRatio));
   const validatedActivitiesHeightRatio = Math.max(
     0.1,
@@ -51,14 +63,14 @@ export function calculateLayout(
     totalAvailableHeight * validatedActivitiesHeightRatio;
   const opportunitiesHeight =
     totalAvailableHeight * (1 - validatedActivitiesHeightRatio);
-  const idealTeethHeight = Math.max(80, opportunitiesHeight * 0.3);
-  const teethHeight = Math.min(
-    idealTeethHeight,
-    Math.max(40, opportunitiesHeight - 40),
+  const idealNoseHeight = Math.max(MIN_NOSE_HEIGHT * 2, opportunitiesHeight * NOSE_HEIGHT_RATIO);
+  const noseHeight = Math.min(
+    idealNoseHeight,
+    Math.max(MIN_NOSE_HEIGHT, opportunitiesHeight - MIN_NOSE_HEIGHT),
   );
   const opportunitiesPlotHeight = Math.max(
-    40,
-    opportunitiesHeight - teethHeight,
+    MIN_PLOT_HEIGHT,
+    opportunitiesHeight - noseHeight,
   );
 
   const activitiesRange: [number, number] = [
@@ -73,13 +85,13 @@ export function calculateLayout(
     opportunitiesRange[0],
     opportunitiesRange[0] + opportunitiesPlotHeight,
   ];
-  const teethRange: [number, number] = [
+  const noseRange: [number, number] = [
     opportunitiesPlotRange[1],
     opportunitiesRange[1],
   ];
 
-  const rowHeight = 40;
-  const barHeight = rowHeight * 0.7;
+  const rowHeight = DEFAULT_ROW_HEIGHT;
+  const barHeight = rowHeight * BAR_HEIGHT_RATIO;
 
   return {
     width,
@@ -90,11 +102,11 @@ export function calculateLayout(
     activitiesHeight,
     opportunitiesHeight,
     opportunitiesPlotHeight,
-    teethHeight,
+    noseHeight,
     activitiesRange,
     opportunitiesRange,
     opportunitiesPlotRange,
-    teethRange,
+    noseRange,
     rowHeight,
     barHeight,
   };
@@ -111,13 +123,13 @@ export function updateLayoutWithBuckets(
 
   const rowHeight =
     totalBuckets > 0
-      ? Math.min(40, layout.opportunitiesPlotHeight / totalBuckets)
-      : 40;
+      ? Math.min(DEFAULT_ROW_HEIGHT, layout.opportunitiesPlotHeight / totalBuckets)
+      : DEFAULT_ROW_HEIGHT;
 
   return {
     ...layout,
     rowHeight,
-    barHeight: rowHeight * 0.7,
+    barHeight: rowHeight * BAR_HEIGHT_RATIO,
   };
 }
 
@@ -134,36 +146,33 @@ export function createScales(
   const maxRevenue = getMaxRevenue(buckets);
 
   // Revenue scale for bar widths
-  const revenueScale = d3
-    .scaleLinear()
+  const revenueScale = scaleLinear()
     .domain([0, maxRevenue > 0 ? maxRevenue : 1])
-    .range([0, faceWidth * 0.8]);
+    .range([0, faceWidth * REVENUE_SCALE_WIDTH_RATIO]);
 
   // Activities time scale
   const activityTimestamps = data.map((a) => new Date(a.timestamp));
-  let activitiesTimeScale: d3.ScaleTime<number, number, never>;
+  let activitiesTimeScale: ScaleTime<number, number, never>;
 
   if (activityTimestamps.length > 0) {
     const minActivityTime = new Date(
-      Math.min(...activityTimestamps.map((d) => d.getTime())),
+      activityTimestamps.reduce((min, d) => Math.min(min, d.getTime()), Infinity),
     );
     const maxActivityTime = new Date(
-      Math.max(...activityTimestamps.map((d) => d.getTime())),
+      activityTimestamps.reduce((max, d) => Math.max(max, d.getTime()), -Infinity),
     );
     const activityTimePadding =
-      (maxActivityTime.getTime() - minActivityTime.getTime()) * 0.05 ||
-      86400000;
+      (maxActivityTime.getTime() - minActivityTime.getTime()) * TIME_PADDING_RATIO ||
+      DEFAULT_TIME_PADDING_MS;
 
-    activitiesTimeScale = d3
-      .scaleTime()
+    activitiesTimeScale = scaleTime()
       .domain([
         new Date(minActivityTime.getTime() - activityTimePadding),
         new Date(maxActivityTime.getTime() + activityTimePadding),
       ])
       .range(activitiesRange);
   } else {
-    activitiesTimeScale = d3
-      .scaleTime()
+    activitiesTimeScale = scaleTime()
       .domain([new Date(0), new Date(1)])
       .range(activitiesRange);
   }
@@ -179,24 +188,24 @@ export function createScales(
     }
   }
 
-  let opportunitiesTimeScale: d3.ScaleTime<number, number, never>;
+  let opportunitiesTimeScale: ScaleTime<number, number, never>;
 
   if (opportunityCloseDates.length > 0) {
     const minOppTime = new Date(
-      Math.min(...opportunityCloseDates.map((d) => d.getTime())),
+      opportunityCloseDates.reduce((min, d) => Math.min(min, d.getTime()), Infinity),
     );
     const maxOppTime = new Date(
-      Math.max(...opportunityCloseDates.map((d) => d.getTime())),
+      opportunityCloseDates.reduce((max, d) => Math.max(max, d.getTime()), -Infinity),
     );
     const oppTimePadding =
-      (maxOppTime.getTime() - minOppTime.getTime()) * 0.05 || 86400000;
+      (maxOppTime.getTime() - minOppTime.getTime()) * TIME_PADDING_RATIO ||
+      DEFAULT_TIME_PADDING_MS;
 
     const domainMin = new Date(minOppTime.getTime() - oppTimePadding);
     const domainMax = new Date(maxOppTime.getTime() + oppTimePadding);
 
     // Calculate where earliest bucket would render with natural domain
-    const tempScale = d3
-      .scaleTime()
+    const tempScale = scaleTime()
       .domain([domainMin, domainMax])
       .range(opportunitiesPlotRange);
 
@@ -234,20 +243,17 @@ export function createScales(
       }
     }
 
-    opportunitiesTimeScale = d3
-      .scaleTime()
+    opportunitiesTimeScale = scaleTime()
       .domain([adjustedDomainMin, domainMax])
       .range(opportunitiesPlotRange);
   } else {
-    opportunitiesTimeScale = d3
-      .scaleTime()
+    opportunitiesTimeScale = scaleTime()
       .domain([new Date(0), new Date(1)])
       .range(opportunitiesPlotRange);
   }
 
   // Beam X scale placeholder (will be created in render functions)
-  const beamXScale = d3
-    .scaleLinear()
+  const beamXScale = scaleLinear()
     .domain([-0.5, 0.5])
     .range([margin.left, width - margin.right]);
 
@@ -275,17 +281,15 @@ export function createBeamXScale(
 
   const maxOrdinal =
     ordinalPositions.length > 0
-      ? Math.max(...ordinalPositions.map(Math.abs))
+      ? ordinalPositions.reduce((max, p) => Math.max(max, Math.abs(p)), 0)
       : 0;
 
   // Create two linear scales for the left and right sides
-  const leftScale = d3
-    .scaleLinear()
+  const leftScale = scaleLinear()
     .domain([-maxOrdinal - 0.5, -0.5])
     .range([margin.left, faceLeft]);
 
-  const rightScale = d3
-    .scaleLinear()
+  const rightScale = scaleLinear()
     .domain([0.5, maxOrdinal + 0.5])
     .range([faceRight, width - margin.right]);
 
@@ -300,8 +304,7 @@ export function createBeamXScale(
   };
 }
 
-// Re-export getMaxRevenue for convenience
-export function getMaxRevenue(buckets: FaceBucket[]): number {
+function getMaxRevenue(buckets: FaceBucket[]): number {
   let maxRevenue = 0;
   for (const bucket of buckets) {
     for (const opp of bucket.opportunities) {
