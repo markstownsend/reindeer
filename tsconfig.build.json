@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "declarationDir": "./dist",
+    "allowImportingTsExtensions": false
+  },
+  "include": ["src"],
+  "exclude": [
+    "src/main.tsx",
+    "src/App.tsx",
+    "src/components/ReindeerExplorer",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx"
+  ]
+}

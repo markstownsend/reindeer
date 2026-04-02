@@ -1,6 +1,6 @@
 {
   "name": "reindeer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A reindeer-shaped visualization component for mapping sales activities and opportunities over time",
   "license": "Unlicense",
   "author": "Mark Townsend",
@@ -23,21 +23,38 @@
     "url": "https://github.com/markstownsend/reindeer/issues"
   },
   "type": "module",
+  "main": "./dist/reindeer.js",
+  "module": "./dist/reindeer.js",
+  "types": "./dist/lib.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/reindeer.js",
+      "types": "./dist/lib.d.ts"
+    },
+    "./styles.css": "./dist/reindeer.css"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:lib": "vite build --config vite.config.lib.ts && tsc -p tsconfig.build.json",
     "preview": "vite preview",
     "test": "vitest run",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "pack:local": "npm run build:lib && npm pack"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.18",
     "@tailwindcss/vite": "^4.1.18",
     "clsx": "^2.1.1",
     "d3": "^7.9.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
     "tailwind-merge": "^3.4.0"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
