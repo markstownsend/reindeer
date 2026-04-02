@@ -1,4 +1,15 @@
 import type { Activity } from "../../types/reindeer";
+import { validateActivities } from "../../utils/validateActivities";
+import exampleJson from "./exampleData.json";
+
+const exampleValidation = validateActivities(exampleJson.activities);
+if (!exampleValidation.valid) {
+  console.error(
+    "exampleData.json validation failed:",
+    exampleValidation.errors,
+  );
+}
+const exampleActivities: Activity[] = exampleValidation.data;
 
 export const edgeCaseEmpty: Activity[] = [];
 
@@ -943,6 +954,7 @@ export const mixedBoundAndFree: Activity[] = [
 ];
 
 export const datasets = {
+  "Example (Live)": exampleActivities,
   "6 Opps / 2026 (40 Activities)": sixOpps2026,
   "Multi-Year Portfolio (8 Opps)": multiYearPortfolio,
   "Mixed: Bound and Free Activities": mixedBoundAndFree,

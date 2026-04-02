@@ -27,7 +27,7 @@ const toggleSet = (
 export const ReindeerExplorer: React.FC = () => {
   const [selectedDatasetName, setSelectedDatasetName] = useState<
     keyof typeof datasets
-  >("6 Opps / 2026 (40 Activities)");
+  >("Example (Live)");
   const [width, setWidth] = useState(1000);
   const [height, setHeight] = useState(800);
   const [faceWidthRatio, setFaceWidthRatio] = useState(0.6);

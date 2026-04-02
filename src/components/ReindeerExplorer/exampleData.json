@@ -1,0 +1,82 @@
+{
+  "generatedAt": "2026-04-02",
+  "owner": "towmar",
+  "account": "Customer Example Plc",
+  "dateRange": { "from": "2026-03-01", "to": "2026-03-31" },
+  "activities": [
+    {
+      "id": "00TRU00123jGNeh",
+      "timestamp": "2026-03-24T09:00:00Z",
+      "type": "meeting",
+      "sellers": [
+        { "name": "Mark Taylor", "role": "Solutions Architect", "country": "GB" }
+      ],
+      "customers": [],
+      "partners": [],
+      "description": "Continuation of the XYZ requirements series for Customer's ABC platform — Part 4.",
+      "linkedOpportunities": [
+        { "id": "006RU00123QCvd3", "name": "Customer-GRP-UK-ABC Fargate Enablement-Core", "closeDate": "2026-08-31", "stage": "Qualified", "revenue": 60000, "stageAdjustedRevenue": 12000 }
+      ]
+    },
+    {
+      "id": "00TRU00123jGOqs",
+      "timestamp": "2026-03-24T13:00:00Z",
+      "type": "meeting",
+      "sellers": [
+        { "name": "Mark Taylor", "role": "Solutions Architect", "country": "GB" }
+      ],
+      "customers": [
+        { "name": "David Shanks", "role": "IT", "country": "GB" }
+      ],
+      "partners": [],
+      "description": "Monthly cloud governance review with Customer stakeholders. Reviewed Control Zone and Landing Tower foundations progress.",
+      "linkedOpportunities": [
+        { "id": "0064z00123CNdsN", "name": "Customer - GRP - UK - Control Zone & LT Foundations - Core", "closeDate": "2025-12-31", "stage": "Committed", "revenue": 240000, "stageAdjustedRevenue": 216000 }
+      ]
+    },
+    {
+      "id": "00TRU00123jGP3n",
+      "timestamp": "2026-03-25T17:00:00Z",
+      "type": "meeting",
+      "sellers": [
+        { "name": "Mike Taylor", "role": "Solutions Architect", "country": "GB" }
+      ],
+      "customers": [
+        { "name": "JW Bell", "role": "IT Infrastructure", "country": "GB" }
+      ],
+      "partners": [],
+      "description": "Security assurance engagement with Customer's JW Bell. Discussed security posture, compliance requirements, and assurance framework alignment.",
+      "linkedOpportunities": []
+    },
+    {
+      "id": "00TRU00123jGPer_7",
+      "timestamp": "2026-03-31T09:00:00Z",
+      "type": "meeting",
+      "sellers": [
+        { "name": "Mike Taylor", "role": "Solutions Architect", "country": "GB" }
+      ],
+      "customers": [
+        { "name": "Charmayne Ant", "role": "IT Service Dept", "country": "JP" }
+      ],
+      "partners": [],
+      "description": "Weekly status meeting for the B-portal migration workstream as part of Customer's Compute migration programme.",
+      "linkedOpportunities": [
+        { "id": "006RU000123uDLj", "name": "Customer-WS-UK-Compute Migration-Core", "closeDate": "2027-12-31", "stage": "Business Validation", "revenue": 1800120, "stageAdjustedRevenue": 900060 }
+      ]
+    },
+    {
+      "id": "00TRU00123jGPer_8",
+      "timestamp": "2026-03-31T09:30:00Z",
+      "type": "meeting",
+      "sellers": [
+        { "name": "Mike Taylor", "role": "Solutions Architect", "country": "GB" }
+      ],
+      "customers": [],
+      "partners": [],
+      "description": "Part 5 in the ABC Fargate enablement series for Customer. Continued technical deep-dive on Fargate integration for the ABC platform.",
+      "linkedOpportunities": [
+        { "id": "006RU00123QCvd3", "name": "Customer-GRP-UK-ABC Fargate Enablement-Core", "closeDate": "2026-08-31", "stage": "Qualified", "revenue": 60000, "stageAdjustedRevenue": 12000 }
+      ]
+    }
+  ]
+}
