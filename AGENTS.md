@@ -5,7 +5,9 @@ This file provides the definitive guidance to agents when working with code in t
 ## Commands
 
 - **Dev Server**: `npm run dev` (Vite)
-- **Build**: `npm run build` (tsc + vite build)
+- **Build (app)**: `npm run build` (tsc + vite build)
+- **Build (library)**: `npm run build:lib` (vite library build + tsc declarations)
+- **Pack**: `npm run pack:local` (build:lib + npm pack)
 - **Lint**: `npm run lint` (eslint)
 - **Testing**: **No automated test runner (Vitest/Jest) is configured.**
 
@@ -109,6 +111,9 @@ The core architectural challenge is mapping the `activity_example.json` schema t
    - `getMaxRevenue()` - Calculates maximum revenue for scale normalization
    - `getMonthName()` - Utility for month label display
 
+9. **`src/utils/validateActivities.ts`** — Runtime validation for Activity[] input:
+   - `validateActivities()` — Validates unknown input against the Activity schema, returns typed data or error messages
+
 ### Responsiveness
 
 The chart must be designed to re-calculate D3 scales and positions when container dimensions change, handled via `useEffect` in `ReindeerChart.tsx`.
@@ -186,12 +191,11 @@ The chart renders five distinct layers in order:
 
 1. **`layer-face`** (`<g id="layer-face">`)
 
-   - Year labels and separator lines
+   - Chart title and face boundary
    - Month labels
    - Opportunity bucket backgrounds
    - Stacked opportunity bars (colored by stage)
    - Revenue labels
-   - Legend
 
 2. **`layer-nose`** (`<g id="layer-nose">`)
 
@@ -200,16 +204,16 @@ The chart renders five distinct layers in order:
 
 3. **`layer-beams`** (`<g id="layer-beams">`)
 
-   - Vertical beam edges (lines connecting activity nodes)
-   - Beam labels at bottom
+   - Monthly timeline gridlines
+   - Vertical beam lines connecting activity nodes
 
 4. **`layer-antlers`** (`<g id="layer-antlers">`)
 
-   - Activity nodes (circles, sized by participant count)
-   - Northern Terminus icons (seller/customer participants)
+   - Activity nodes (shapes vary by activity type: circle, diamond, square, triangle, star)
+   - Crown pills (opportunity name, revenue, participant details)
 
 5. **`layer-burrs`** (`<g id="layer-burrs">`)
-   - Horizontal dashed lines connecting beam bottom to opportunity center
+   - Horizontal dashed lines connecting each beam to its opportunity
 
 ## Data Flow
 

@@ -3,17 +3,17 @@
 [![CI](https://github.com/markstownsend/reindeer/actions/workflows/ci.yml/badge.svg)](https://github.com/markstownsend/reindeer/actions/workflows/ci.yml)
 [![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](https://unlicense.org/)
 
-A complex visualization component which looks like a reindeer.
-
 ## Overview
 
-The **Reindeer Chart** is a vertical timeline visualization named for its resemblance to a reindeer head. It maps activities over time on the antlers and connects them via a burr to the head and face. The face contains opportunities in stacked horizontal bars. Time advances as you go North to South on the chart. Navigation East to West in the face reflects the revenue size of the opportunity. The first use case that motivated the need for the visualization was in enterprise software sales where you have a large enterprise sales team pursuing many opportunities at a large customer. It is hard to see what everyone is working on, who is working on what together, who owns what opportunity, what stage the opportunity is at, how much work has gone into it and various other things.
+The **Reindeer Chart** is a vertical timeline visualization named for its resemblance to a reindeer head. It maps activities over time on the antlers and connects them via a burr to the head and face. The face contains opportunities in stacked horizontal bars sized by revenue. Time advances as you go North to South on the chart. The first use case that motivated the need for the visualization was in enterprise software sales where you have a large enterprise sales team pursuing many opportunities at a large customer. It is hard to see what everyone is working on, who is working on what together, who owns what opportunity, what stage the opportunity is at, how much work has gone into it and various other things.
 
 ![initial sketch](./doc/design/reindeer-overview-001.jpg)
 
+For the design intent behind each capability and evidence that it has been delivered, see [INTENT.md](INTENT.md).
+
 ## Features
 
-- **Multi-Year Timeline**: Visualize activities and opportunities across multiple years
+- **Split Multi-Year Timeline**: Visualize activities and opportunities across multiple years with independent Y-axes
 - **Activity Tracking**: Track sales activities with participant information (sellers and customers)
 - **Opportunity Staging**: Display opportunities at different stages (Prospect, Qualified, Technical Validation, Launched, etc.)
 - **Revenue Visualization**: Opportunity size reflects revenue, normalized to the largest opportunity
@@ -43,16 +43,19 @@ A combination of bound activities (connected to opportunities) and free activiti
 ## Installation
 
 ```bash
-npm install
+npm install reindeer
 ```
+
+The package includes the `ReindeerChart` React component, a `validateActivities` utility, and TypeScript type definitions. React 18 or 19 is required as a peer dependency.
 
 ## Usage
 
 ### Basic Component
 
 ```tsx
-import { ReindeerChart } from "./components/ReindeerChart";
-import type { Activity } from "./types/reindeer";
+import { ReindeerChart } from "reindeer";
+import "reindeer/styles.css";
+import type { Activity } from "reindeer";
 
 const myData: Activity[] = [
   {
@@ -101,6 +104,12 @@ function App() {
 | `focusedPeople`         | Set\<string\> | undefined | Set of participant names to highlight. When set, matching beams render at full opacity, others dim.     |
 | `focusMode`             | "or" \| "and" | "or"  | Focus matching mode. "or": highlight beams with any focused person. "and": only beams with all focused people. |
 
+### Styling
+
+The `reindeer/styles.css` import is required — it provides all the Tailwind CSS utility classes used internally by the chart's SVG rendering. Without it, fills, strokes, and text styles will be missing.
+
+Custom styling is not currently supported. The chart uses Tailwind utility classes applied directly to SVG elements via D3, so there is no stable set of semantic CSS classes to override. If you need to customise colours (e.g. stage colours or beam styles), you would need to fork the component.
+
 ### Data Structure
 
 ```typescript
@@ -145,60 +154,96 @@ interface Opportunity {
 
 #### Key Concepts
 
-- **Activities** are the atomic unit of data. Each activity represents a sales touchpoint (meeting, call, demo, etc.) at a point in time.
-- **Linked opportunities** are snapshots — the same opportunity can appear on multiple activities with different stages, reflecting how the deal progressed over time. The visualization uses this to color activity nodes by the stage at the time they occurred.
-- **Free activities** (empty `linkedOpportunities` array) render on a central beam inside the face, not connected to any opportunity.
-- **Country codes** enable flag emoji display (🇺🇸 🇬🇧 🇯🇵) in the Northern Terminus and hover tooltips. Optional — a dot is shown when omitted.
-- **Activity type** determines the shape of the node on the beam: circle (meeting), diamond (call), square (email), triangle (demo), star (workshop). Optional — defaults to circle.
-- **Opportunity name** appears in the Northern Terminus at the top of each beam. Falls back to the opportunity ID if omitted.
-- **Stage** can be any string. The built-in color palette maps: Prospect (indigo), Qualified (blue), Technical Validation (purple), Business Validation (violet), Committed (green), Closed Lost (red), Launched (emerald), Completed (teal). Unknown stages render in gray.
+- **Activities** are the atomic unit of data. Each activity represents a sales touchpoint — a meeting, call, email, demo, or workshop — between your sellers and a customer at a specific point in time. Think of it as a row in a CRM activity log.
+- **Sellers, customers, and partners** are the people who participated in the activity. Sellers are your team, customers are the buyer's team, and partners are third parties (e.g. implementation consultants, channel partners). Each person has a name, role (e.g. "Account Executive", "CTO"), and optional country.
+- **Opportunities** represent deals in your pipeline. Each opportunity has a stage (e.g. Prospect → Qualified → Technical Validation → Launched), a close date, and a revenue value. These map directly to the opportunity object in CRM systems like Salesforce.
+- **Linked opportunities on activities are snapshots** — when you log an activity against a deal, you capture the deal's stage and revenue *at that moment*. The same opportunity can appear on many activities with different stages, showing how the deal progressed over time. The visualization uses this to color activity nodes by the stage when they occurred.
+- **Free activities** (empty `linkedOpportunities` array) are sales work not tied to a specific deal — e.g. account planning sessions, relationship-building dinners, or general discovery calls before a deal exists.
+- **Stage** can be any string. The built-in color palette maps common pipeline stages: Prospect (indigo), Qualified (blue), Technical Validation (purple), Business Validation (violet), Committed (green), Closed Lost (red), Launched (emerald), Completed (teal). Unrecognised stages render in gray.
+- **Revenue** is the absolute deal value. `stageAdjustedRevenue` is the weighted value (e.g. a $100k deal at 20% probability = $20k stage-adjusted). Both are used in the visualization — revenue for sizing opportunity bars, stage-adjusted revenue for pipeline summaries.
+- **Country codes** (ISO 3166-1 alpha-2, e.g. `"US"`, `"JP"`) enable flag emoji display in participant lists and tooltips. Optional — a dot is shown when omitted.
+- **Activity type** determines the shape of the node on the chart: circle (meeting), diamond (call), square (email), triangle (demo), star (workshop). Optional — defaults to circle/meeting.
+
+### Data Validation
+
+The project includes a runtime validator for `Activity[]` data in `src/utils/validateActivities.ts`. This is a hand-written validator with no external dependencies — we deliberately avoided taking a dependency on a JSON Schema validation library (e.g. Ajv, Zod) to keep the package lightweight and free of transitive dependencies for what is a straightforward, stable schema.
+
+```typescript
+import { validateActivities } from "./utils/validateActivities";
+
+const result = validateActivities(untrustedInput);
+
+if (!result.valid) {
+  console.error("Validation errors:", result.errors);
+  // result.errors is a string[] of human-readable messages, e.g.:
+  // ['activity "a1": "timestamp" must be a valid ISO 8601 string',
+  //  'activity "a1" sellers[0]: "name" must be a non-empty string']
+} else {
+  // result.data is a typed Activity[] safe to pass to <ReindeerChart>
+  <ReindeerChart data={result.data} />
+}
+```
+
+The validator checks:
+
+| Field | Rule |
+| --- | --- |
+| `id` | Required non-empty string |
+| `timestamp` | Valid ISO 8601 date string |
+| `type` | Optional; when present must be one of: `meeting`, `call`, `email`, `demo`, `workshop` |
+| `description` | Required string |
+| `sellers` | Required non-empty array of person objects |
+| `customers` | Required array (may be empty) |
+| `partners` | Optional; when present must be an array of person objects |
+| `linkedOpportunities` | Required array (empty = free activity) |
+| Person `.name`, `.role` | Required non-empty strings |
+| Person `.country` | Optional; when present must be ISO 3166-1 alpha-2 (e.g. `"US"`) |
+| Opportunity `.id`, `.stage` | Required non-empty strings |
+| Opportunity `.closeDate` | Required `YYYY-MM-DD` format |
+| Opportunity `.revenue`, `.stageAdjustedRevenue` | Required non-negative numbers |
+
+Use the validator when loading data from external sources (JSON files, APIs, Salesforce exports) before passing it to `<ReindeerChart>`. The test harness (`mockData.ts`) uses it to validate `exampleData.json` at import time.
 
 ## Visual Structure
 
 ### Layout
 
 - **Orientation**: Vertical
-- **Y-Axis**: Time (Historic start year (usually current year) → Future Years)
-- **X-Axis**: Split into two domains:
-  - **West** (Left side, older opportunities/ before some date cut off)
-  - **East** (Right side, newer opportunities/ after some date cut off)
+- **Y-Axis**: Time (earliest activities at top → latest opportunity close dates at bottom). The Y-axis for activities is independent of the Y-axis for opportunity close dates, to prevent overlap.
+- **X-Axis**: Beams fan outward from center based on opportunity revenue; opportunity bars are stacked horizontally in the face
 
 ### Components
 
-- **Central Axis**: A vertical dashed line separating West and East
-- **Activity Field**: The section of the screen above the face where the antlers appear
-  - Can scale the y-axis to be days, weeks or months in this section
-  - All activities are plotted in this section of the chart
-  - Contains horizontal lines indicating the time period boundaries
-- **Time Blocks**:
-  - Represented as rectangular regions
-  - Can span multiple years
-  - Located on either West or East side
-  - Located in the face of the reindeer
+- **Activity Field**: The section of the chart above the face where the antlers appear
+  - All activities are plotted in this section
+  - Contains horizontal lines indicating time period boundaries
 - **Opportunities**:
-  - Rectangles placed within the time blocks
-  - Size determined by absolute revenue normalized to the size of the largest opportunity
+  - Horizontal bars stacked within time-period buckets in the face
+  - Width determined by absolute revenue normalized to the largest opportunity
 - **Activities**:
-  - Shapes placed in the activity field
-  - Shapes are different depending on what type of activity
-  - Shapes are colored differently depending on which customer actors attended
-    - red for economic buyer
-    - yellow for technical buyer
-    - red and yellow if both attended
+  - Shapes placed in the activity field along vertical beams
+  - Shape varies by activity type: circle (meeting), diamond (call), square (email), triangle (demo), star (workshop)
 - **Activity Timelines aka "Beam"**:
-  - Vertical lines extending Northwards from the same level as the specific opportunities that the activities relate to
-  - Activities along these vertical lines depending on the date when they occurred
-  - Connected to the opportunity via a horizontal line (the burr)
+  - Each opportunity gets one vertical beam in the activity field (above the face)
+  - Beams are positioned horizontally using an alternating displacement algorithm:
+    1. Opportunities are sorted by their max revenue (descending)
+    2. The highest-revenue opportunity is placed at ordinal +1 (right of center, closest to face)
+    3. The next highest at ordinal -1 (left of center, closest to face)
+    4. Then +2, -2, +3, -3, etc. — fanning outward like antlers
+    5. Free (unlinked) activities sit at ordinal 0, the center of the face
+  - The face is narrower than the full width, so bound beams always render outside the face in the "antler" zones
+  - Activities are plotted along each beam at the y-position corresponding to their timestamp
+  - Connected to the opportunity via a horizontal dashed line (the burr)
 
 ### Visualization Layers
 
 The chart renders five distinct layers in order:
 
-1. **Face** - Year labels, month labels, opportunity bucket backgrounds, stacked opportunity bars, revenue labels, and legend
-2. **Nose** - Pipeline donut chart showing revenue by stage
-3. **Beams** - Vertical beam edges connecting activity nodes
-4. **Antlers** - Activity nodes (circles, sized by participant count) and Northern Terminus icons
-5. **Burrs** - Horizontal dashed lines connecting beam bottom to opportunity center
+1. **Face** - Chart title, face boundary, month labels, opportunity bucket backgrounds, stacked opportunity bars with revenue labels
+2. **Nose** - Pipeline summary bars showing revenue by stage (full pipeline bar, plus a focused subset bar when people filtering is active)
+3. **Beams** - Monthly timeline gridlines and vertical beam lines connecting activity nodes
+4. **Antlers** - Activity nodes (shapes vary by activity type) and Crown pills showing opportunity name, revenue, and participant details
+5. **Burrs** - Horizontal dashed lines connecting each beam to its opportunity
 
 ## Development
 

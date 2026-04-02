@@ -46,9 +46,18 @@ See [AGENTS.md](./AGENTS.md) for detailed architecture guidelines.
 1. Fork the repository
 2. Create a feature branch (`git checkout -b my-feature`)
 3. Make your changes
-4. Verify visually using the TestHarness
+4. Verify visually using the test harness (`npm run dev`)
 5. Ensure `npm run build` and `npm run lint` pass
-6. Submit a Pull Request with a clear description of what changed and why
+6. Test the package locally before submitting:
+   ```bash
+   npm run pack:local          # builds the library and creates reindeer-<version>.tgz
+   ```
+   Then in a separate test project:
+   ```bash
+   npm install ../path/to/reindeer-<version>.tgz
+   ```
+   Verify the component imports, renders, and styles correctly as a consumer would experience it.
+7. Submit a Pull Request with a clear description of what changed and why
 
 ## Code of Conduct
 
