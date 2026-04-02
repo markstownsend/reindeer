@@ -15,6 +15,8 @@ export default tseslint.config(
       "design/**",
       "node_modules/**",
       "dist/**",
+      "vite.config.lib.ts",
+      "vitest.config.ts",
     ],
   },
   js.configs.recommended,
