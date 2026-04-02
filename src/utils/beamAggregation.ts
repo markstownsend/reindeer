@@ -64,7 +64,7 @@ export function calculateBeamPositions(activities: Activity[]): Beam[] {
   // Step 3: Process Opportunity-Bound Activities
   const activityMap = groupActivitiesByOpportunity(boundActivities);
 
-  // Create a list of unique opportunities with their total revenue
+  // Create a list of unique opportunities with their max revenue
   const opportunityRevenueMap = new Map<string, number>();
 
   for (const activity of boundActivities) {
@@ -72,12 +72,12 @@ export function calculateBeamPositions(activities: Activity[]): Beam[] {
       const currentRevenue = opportunityRevenueMap.get(opportunity.id) || 0;
       opportunityRevenueMap.set(
         opportunity.id,
-        currentRevenue + opportunity.revenue,
+        Math.max(currentRevenue, opportunity.revenue),
       );
     }
   }
 
-  // Sort opportunities by total revenue (descending)
+  // Sort opportunities by max revenue (descending)
   const sortedOpportunities = Array.from(opportunityRevenueMap.entries()).sort(
     (a, b) => b[1] - a[1],
   );
