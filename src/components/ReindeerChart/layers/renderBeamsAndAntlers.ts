@@ -194,7 +194,7 @@ export function renderBeamsAndAntlers(
         .attr("opacity", isBeamFocused(beam) ? 1 : 0.15);
     }
 
-    // Render activity nodes (circles only — names shown at terminus and on hover)
+    // Render activity nodes (circles only — names shown at crown and on hover)
     sortedActivities.forEach((activity) => {
       const y = activitiesTimeScale(new Date(activity.timestamp));
 
@@ -270,7 +270,7 @@ export function renderBeamsAndAntlers(
         });
     });
 
-    // Northern Terminus: compact pill (name + revenue + count), expands on hover
+    // Crown: compact pill (name + revenue + count), expands on hover
     const uniqueSellers = new Map<string, string | undefined>();
     const uniqueCustomers = new Map<string, string | undefined>();
     const uniquePartners = new Map<string, string | undefined>();
@@ -309,17 +309,17 @@ export function renderBeamsAndAntlers(
     const pillX = beamX - pillWidth / 2;
     const pillY = Math.max(layout.margin.top, topY - 6 - pillHeight);
 
-    const terminusGroup = antlersLayer
+    const crownGroup = antlersLayer
       .append("g")
-      .attr("class", "northern-terminus")
+      .attr("class", "crown")
       .attr("cursor", "pointer");
 
-    terminusGroup.attr("opacity", isBeamFocused(beam) ? 1 : 0.15);
+    crownGroup.attr("opacity", isBeamFocused(beam) ? 1 : 0.15);
 
     const stageStroke = getStageColor(oppStage).replace("fill-", "stroke-");
 
     // Compact pill (always visible)
-    terminusGroup
+    crownGroup
       .append("rect")
       .attr("x", pillX)
       .attr("y", pillY)
@@ -330,7 +330,7 @@ export function renderBeamsAndAntlers(
       .attr("stroke-width", 1.5)
       .attr("opacity", 0.9);
 
-    terminusGroup
+    crownGroup
       .append("text")
       .attr("x", pillX + pillWidth / 2)
       .attr("y", pillY + 10)
@@ -339,7 +339,7 @@ export function renderBeamsAndAntlers(
       .attr("class", "fill-orange-400 text-[7px] font-semibold")
       .text(oppName.length > 10 ? oppName.slice(0, 9) + "…" : oppName);
 
-    terminusGroup
+    crownGroup
       .append("text")
       .attr("x", pillX + pillWidth / 2)
       .attr("y", pillY + 23)
@@ -358,9 +358,9 @@ export function renderBeamsAndAntlers(
     const expandedX = beamX - expandedWidth / 2;
     const expandedY = Math.max(layout.margin.top, topY - 6 - pillHeight - expandedHeight - 2);
 
-    const expandedGroup = terminusGroup
+    const expandedGroup = crownGroup
       .append("g")
-      .attr("class", "terminus-expanded")
+      .attr("class", "crown-expanded")
       .attr("opacity", 0);
 
     expandedGroup
@@ -419,12 +419,12 @@ export function renderBeamsAndAntlers(
     uniquePartners.forEach((country, name) => renderParticipant(name, country, "fill-orange-300"));
 
     // Hover interaction
-    terminusGroup
+    crownGroup
       .on("mouseenter", function () {
-        select(this).select(".terminus-expanded").attr("opacity", 1);
+        select(this).select(".crown-expanded").attr("opacity", 1);
       })
       .on("mouseleave", function () {
-        select(this).select(".terminus-expanded").attr("opacity", 0);
+        select(this).select(".crown-expanded").attr("opacity", 0);
       });
   });
 }

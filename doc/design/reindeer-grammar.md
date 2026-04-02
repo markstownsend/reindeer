@@ -1,4 +1,4 @@
-# Grammar to describe visualiztion artifacts
+# Grammar to describe visualization artifacts
 
 ## 1. Data
 
@@ -56,7 +56,7 @@ Break the picture into layers of marks:
   - Beam edges: polylines connecting previous activity → next activity across time.
 - Stacked bar marks:
   - For each time bucket and lane (or global bar at bottom): rectangles stacked in x (within the bar) whose width encodes normalized revenue.
-- Beam Northern Terminus:
+- Beam Crown:
   - Icons representing each person who worked on an activity in the beam.
 - Beam Southern Terminus:
   - A line (the burr) which connects the beam to the opportunity in the Face.
@@ -129,4 +129,4 @@ Describe interaction in similar terms:
 - Filtering: selection predicate → subset of data passed to specific layers.
 - Navigation: pan/zoom in time (update x-scale domain) or expand/collapse branches (change lane/depth assignments).
 
-## You can now "instantiate" this grammar in whatever stack you choose (e.g., SVG + D3, Canvas, or a 2.5D projection), but the grammar itself is technology-agnostic and should stay stable even if you change the rendering backend.
+#### You can now "instantiate" this grammar in whatever stack you choose (e.g., SVG + D3, Canvas, or a 2.5D projection), but the grammar itself is technology-agnostic and should stay stable even if you change the rendering backend.

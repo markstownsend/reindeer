@@ -151,17 +151,6 @@ export const ReindeerChart: React.FC<ReindeerChartProps> = ({
       });
     }, "nose");
 
-    // Render center divider line
-    svg
-      .append("line")
-      .attr("x1", width / 2)
-      .attr("y1", layout.margin.top)
-      .attr("x2", width / 2)
-      .attr("y2", height - layout.margin.bottom)
-      .attr("class", "stroke-gray-600")
-      .attr("stroke-width", 2)
-      .attr("stroke-dasharray", "5,5");
-
     // Build render beams: use layout beam positions, keep entire beams whose opportunity is in filtered set
     const filteredOppIdsSet = new Set(
       safeData.flatMap((a) => a.linkedOpportunities.map((o) => o.id)),
